@@ -1,0 +1,81 @@
+name: Tarea
+description: Tarea acotada de una historia de usuario (normalmente la crea el orquestador).
+title: "[HU-xx] "
+labels: ["tarea"]
+body:
+  - type: input
+    id: historia
+    attributes:
+      label: Historia de usuario
+      description: ID de la historia del backlog.
+      placeholder: HU-15
+    validations:
+      required: true
+  - type: input
+    id: funcionalidad
+    attributes:
+      label: Funcionalidad que atiende
+      placeholder: Registro de donaciones con tipo, monto y fecha
+    validations:
+      required: true
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Objetivo
+      description: Una sola funcionalidad verificable.
+    validations:
+      required: true
+  - type: dropdown
+    id: perfil
+    attributes:
+      label: Perfil de agente
+      options:
+        - analista
+        - interfaz
+        - backend
+        - datos-qa
+    validations:
+      required: true
+  - type: textarea
+    id: archivos_autorizados
+    attributes:
+      label: Archivos autorizados
+      description: Lista exacta de archivos o carpetas que se pueden crear o modificar.
+      placeholder: |
+        - backend/app/donaciones/servicio.py
+        - backend/tests/test_donaciones.py
+    validations:
+      required: true
+  - type: textarea
+    id: fuera_de_limite
+    attributes:
+      label: Fuera de límite
+      description: Archivos o áreas que NO se deben tocar.
+    validations:
+      required: true
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de aceptación
+      description: Verificables, escritos antes de empezar.
+      placeholder: |
+        - [ ] Una donación con monto 0 o negativo es rechazada
+        - [ ] El tesorero la ve en la lista; un miembro sin permiso recibe 403
+    validations:
+      required: true
+  - type: textarea
+    id: dependencias
+    attributes:
+      label: Dependencias
+      placeholder: "Depende de #22 / Ninguna"
+    validations:
+      required: true
+  - type: dropdown
+    id: critico
+    attributes:
+      label: ¿Módulo crítico? (donaciones, gastos, reporte financiero, auth, base de datos)
+      options:
+        - "No"
+        - "Sí"
+    validations:
+      required: true

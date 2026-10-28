@@ -1,0 +1,37 @@
+# Secretos y configuración local (NUNCA subir)
+.env
+.env.*
+!.env.example
+*.cer
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Editores y sistema
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+~$*
+
+# Claude Code (configuración personal de cada quien)
+.claude/settings.local.json
+
+.vercel
+.env*
