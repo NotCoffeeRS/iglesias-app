@@ -12,3 +12,9 @@ Las decisiones están **propuestas** hasta que Marcos las marque como *confirmad
 | D5 | 2026-10-28 | Donaciones y gastos no se borran: se anulan con motivo. Datos financieros visibles solo para administrador, pastor de su sede y tesorero. | propuesta |
 | D6 | 2026-10-28 | Calendario: Sprint 0 (28 oct), 1 (29–30 oct), 2 (31 oct–1 nov); 2 nov es solo entrega. Lo Deseable se recorta primero. | propuesta |
 | D7 | 2026-10-28 | Solo datos inventados en repo y pruebas; nunca datos reales de miembros o donaciones. | propuesta |
+| D8 | 2026-10-29 | La app es del Presbiterio de la 3ra IAFCJ: 4 iglesias (3ra de Mérida con 2 sedes, 4ta, 6ta y Huhí). Sin sede principal, pero rinden cuentas al pastor Jorge Lozano (presbítero). | confirmada (clienta) |
+| D9 | 2026-10-29 | Dinero visible solo para pastor y tesorero de su iglesia; el presbítero lo ve en todas. Cada cargo ve solo su área. Reemplaza D4 y D5 en lo que contradigan. | confirmada (clienta) |
+| D10 | 2026-10-29 | Ubicación = enlace de Google Maps (sin mapa propio). Horarios y ubicaciones consultables sin cuenta; el resto, solo liderazgo. | confirmada (clienta) |
+| D11 | 2026-10-29 | Uso principal desde celular; también computadora. | confirmada (clienta) |
+| D12 | 2026-10-29 | Cada pastor tiene un "apoyo" que usa la app por él. Sus permisos sobre el dinero están por confirmar. | pendiente |
+| D13 | 2026-10-29 | Datos públicos de las iglesias pueden ser reales; personas y dinero de ejemplo, siempre ficticios. | propuesta |

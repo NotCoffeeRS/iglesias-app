@@ -93,4 +93,14 @@ No se piden ni se anotan datos reales de personas: para las pruebas usamos nombr
 
 ## Respuestas
 
-(Marcos anota aquí la fecha y las respuestas; luego se resumen en `DECISIONES.md`.)
+### 29 oct 2026 — primera tanda (secciones 0, 1 y 2)
+
+- Presbiterio de la 3ra IAFCJ: 3ra de Mérida (pastor Jorge Lozano; 2 sedes: Madero y Kanasín), 4ta (Isaac Euan), 6ta (Manuel Ortega), Huhí (Jeremías Camaal). Sin sede principal; rinden cuentas al pastor de la 3ra.
+- Usuarios: pastores, secretarios/as, tesoreros, líderes. Dinero: solo pastor y tesorero de su iglesia; el pastor Lozano, de todas.
+- Hoy lo llevan en Excel y libretas. Uso en celular y computadora, más en celular.
+- Datos de iglesia: nombre, foto de fachada, dirección, pastor, teléfono del pastor y de la iglesia (opcionales), redes sociales propias y relacionadas.
+- Servicios: cultos de domingo (horario varía), entre semana (la 6ta tiene miércoles), oración, jóvenes, DNA, ministerios, escuelas (IBID), células. Los horarios casi no cambian.
+- Ubicación: enlace de Google Maps (colección de la clienta). Horarios y ubicaciones públicos; el resto solo liderazgo.
+- Cargos: pastor y esposa, tesoreros, líderes de red (varones, damas, jóvenes), líderes y asistentes de célula, líderes de ministerio (con asistente o segundo), diáconos, ministros, encargados de área (p. ej. la tiendita). Cada cargo ve solo su área; el pastor ve toda su iglesia; el presbítero, todo. Cada pastor tiene una persona de apoyo con la app.
+
+**Sin responder aún:** miembros, asistencia, eventos, ministerios (detalle), donaciones, gastos, comunicados, reportes, imagen y lenguaje, y si el apoyo del pastor ve el dinero.
