@@ -6,9 +6,10 @@ Si algo de aquí contradice una instrucción informal, **gana este archivo**.
 
 ## 1. Contexto del proyecto
 
-**Iglesias App**: aplicación **web** para administrar una red de iglesias cristianas (mínimo 4 sedes):
-horarios y ubicaciones, usuarios y roles, miembros, asistencia, eventos, ministerios, donaciones y aportaciones,
-gastos y costos, comunicados y reportes. Proyecto escolar con método Scrum; entrega el 2 de noviembre de 2026
+**Iglesias App**: aplicación **web** (sobre todo en celular) del **Presbiterio de la 3ra IAFCJ**: 4 iglesias
+(3ra de Mérida con 2 sedes, Madero y Kanasín; 4ta y 6ta de Mérida; Huhí, Yucatán) que rinden cuentas al pastor Jorge Lozano (presbítero).
+Horarios y ubicaciones, usuarios y cargos, miembros, asistencia, eventos, grupos (redes, células, ministerios), donaciones y aportaciones,
+gastos y costos, comunicados y reportes. Uso interno del liderazgo; solo horarios y ubicaciones son públicos. Proyecto escolar con método Scrum; entrega el 2 de noviembre de 2026
 (meta interna: 1 de noviembre).
 
 Idioma: **español** en la interfaz, los mensajes de commit, los Issues y la documentación.
@@ -48,8 +49,8 @@ docs/               documentación y registro de decisiones
    Nunca modifiques la base de datos a mano.
 8. **Toda lógica nueva lleva pruebas.** En módulos críticos (donaciones, gastos, reporte financiero, usuarios y permisos,
    migraciones) las pruebas son obligatorias y deben cubrir el caso del Issue.
-9. **Privacidad:** el repo, los Issues, las capturas y los datos de ejemplo usan **solo datos inventados**.
-   Nunca datos reales de miembros ni de donaciones. Las contraseñas se guardan con hash; nunca en texto plano.
+9. **Privacidad:** los datos públicos de las iglesias (nombre, dirección, pastor, redes) pueden ser reales; miembros,
+   teléfonos personales, donaciones y gastos de ejemplo son **siempre ficticios**. Nunca datos reales de personas ni de dinero en el repo, Issues o capturas. Las contraseñas se guardan con hash; nunca en texto plano.
    Sin datos personales en URLs.
 10. **Permisos en el servidor:** el backend valida el rol de cada petición; ocultar un botón en la interfaz no basta.
 11. Antes de entregar, **corre las pruebas y el linter** y reporta el resultado real (no lo supongas).
@@ -107,13 +108,21 @@ npm run lint
 npm run build
 ```
 
-## 9. Reglas de negocio clave (provisionales hasta que el cliente responda `docs/preguntas-cliente.md`)
+## 9. Reglas de negocio (respuestas de la clienta, 29 oct; lo marcado (?) sigue pendiente)
 
-- Una **iglesia** (sede) tiene dirección, coordenadas, horarios de servicio y un pastor. Hay mínimo 4.
-- Un **miembro** pertenece a una iglesia; puede estar en varios ministerios.
-- La **asistencia** se registra por servicio o evento de una iglesia, con la lista de miembros presentes y un conteo de visitantes.
-- Una **donación** pertenece a una iglesia, tiene tipo (diezmo, ofrenda, otro), monto > 0, fecha y método; el miembro es opcional (puede ser anónima).
-- Un **gasto** pertenece a una iglesia, tiene categoría, monto > 0, fecha y proveedor o nota.
-- Donaciones y gastos **no se borran**: se anulan con motivo, para conservar la trazabilidad.
-- Cada usuario ve solo lo que su rol permite; los datos financieros solo los ven administrador, pastor de su sede y tesorero (?).
-- Reporte financiero: balance = suma de donaciones − suma de gastos, por iglesia y periodo; los registros anulados no cuentan.
+- El **Presbiterio** tiene 4 iglesias. La 3ra de Mérida tiene **2 sedes**; las demás, una. Cada iglesia: nombre, foto de fachada,
+  dirección y enlace de Google Maps, pastor, teléfono del pastor y de la iglesia (opcionales), redes sociales propias y relacionadas (varias).
+- **Horarios** por sede y tipo de servicio: culto de domingo, culto entre semana, oración, jóvenes, DNA, escuela (IBID), célula, ministerio.
+- **Grupos**: redes (varones, damas, jóvenes), células, ministerios, escuelas y áreas (p. ej. la tiendita); cada uno con líder y asistente/segundo.
+- **Cargos**: presbítero, pastor, esposa de pastor, apoyo del pastor, tesorero, líder de red/célula/ministerio, asistente, diácono, ministro, encargado de área.
+- **Visibilidad**: cada cargo ve solo lo de su área; el pastor ve todo lo de su iglesia; el presbítero ve todo el Presbiterio.
+- **Dinero**: solo pastor y tesorero de su iglesia lo ven, y el presbítero en todas las iglesias. Apoyo del pastor y demás cargos: sin acceso (?).
+- Horarios y ubicaciones son **públicos** (sin cuenta); todo lo demás exige sesión.
+- Donaciones y gastos **no se borran**: se anulan con motivo (?). Reporte financiero: donaciones − gastos por iglesia y periodo, sin anulados; el presbítero ve el consolidado.
+- **Miembros**: nombre, teléfono, correo, nacimiento, dirección, estado civil, fecha de bautizo y fecha desde que forman parte de la congregación (sin datos de familia).
+  Estados: activo, inactivo, visitante, en proceso de ganar, de discipular o de consolidar.
+- **Niños y adolescentes**: nombre, nacimiento, dirección, niño/niña (4 a 11 años) o adolescente (12 a 17) y sus tutores.
+- **Asistencia**: el líder de célula marca quién de su célula asistió; el ujier (cargo rotativo) marca quién faltó de quienes no tienen célula.
+- **Ingresos**: se registran **cantidades** por culto o fecha y por tipo (diezmos, ofrendas, EVAMI, talento/venta de comida, otras donaciones con descripción). No se registra quién dio.
+- **Gastos**: categorías luz, agua, renta, mantenimiento, material de construcción, materiales y reposiciones, apoyo a miembros, otros. Tesorería actúa en sujeción al pastor local (flujo de autorización por confirmar (?)).
+
