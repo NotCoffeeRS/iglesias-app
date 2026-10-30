@@ -104,3 +104,13 @@ No se piden ni se anotan datos reales de personas: para las pruebas usamos nombr
 - Cargos: pastor y esposa, tesoreros, líderes de red (varones, damas, jóvenes), líderes y asistentes de célula, líderes de ministerio (con asistente o segundo), diáconos, ministros, encargados de área (p. ej. la tiendita). Cada cargo ve solo su área; el pastor ve toda su iglesia; el presbítero, todo. Cada pastor tiene una persona de apoyo con la app.
 
 **Sin responder aún:** miembros, asistencia, eventos, ministerios (detalle), donaciones, gastos, comunicados, reportes, imagen y lenguaje, y si el apoyo del pastor ve el dinero.
+
+### 30 oct 2026 — segunda tanda (miembros, asistencia, donaciones, gastos)
+
+- Miembros: sí se registran, con nombre y desde cuándo forman parte de la congregación. Datos: todos los propuestos menos familia. Estados: miembro activo, miembro inactivo, visitante, en proceso de ganar, en proceso de discipular, en proceso de consolidar.
+- Niños y adolescentes: nombre, nacimiento, dirección, niño o niña (4 a 11 años) o adolescente (12 a 17) y tutores.
+- Privacidad: no se le ocurre nada por ahora.
+- Asistencia: cada líder anota quién de su célula asistió al culto (domingo, miércoles u otro día). Para quienes no tienen célula, el ujier (en la puerta) ve quién faltó; los ujieres cambian según el rol asignado.
+- Ingresos: diezmos, ofrendas, EVAMI (evangelismo misionero), talento (venta de comida) y otras donaciones con descripción. Solo se manejan cantidades (ej.: lo recaudado el culto del domingo 1 de septiembre, y una petición para la operación de una hermana).
+- Gastos: luz, agua, renta, mantenimiento, material de construcción, materiales (limpieza, reposición de algo que se rompa), apoyo a miembros, etc. Sí hay autorización: tesorería en sujeción al pastor local.
+

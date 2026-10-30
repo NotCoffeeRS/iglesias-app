@@ -18,3 +18,9 @@ Las decisiones están **propuestas** hasta que Marcos las marque como *confirmad
 | D11 | 2026-10-29 | Uso principal desde celular; también computadora. | confirmada (clienta) |
 | D12 | 2026-10-29 | Cada pastor tiene un "apoyo" que usa la app por él. Sus permisos sobre el dinero están por confirmar. | pendiente |
 | D13 | 2026-10-29 | Datos públicos de las iglesias pueden ser reales; personas y dinero de ejemplo, siempre ficticios. | propuesta |
+| D14 | 2026-10-30 | Se registran los miembros (con fecha de ingreso) y sus 6 estados. Se guardan todos los datos propuestos salvo familia. | confirmada (clienta) |
+| D15 | 2026-10-30 | Niños (4-11) y adolescentes (12-17) se registran con nombre, nacimiento, dirección y tutores. | confirmada (clienta) |
+| D16 | 2026-10-30 | Asistencia: la marca el líder de célula; para quienes no tienen célula, el ujier (cargo rotativo) anota quién faltó. | confirmada (clienta) |
+| D17 | 2026-10-30 | Ingresos por cantidades y tipo (diezmos, ofrendas, EVAMI, talento, otras con descripción); no se registra quién dio. Reemplaza el campo "miembro opcional" de donaciones. | confirmada (clienta) |
+| D18 | 2026-10-30 | Gastos con lista fija de categorías; la tesorería está en sujeción al pastor local. Detalle de la autorización por confirmar. | confirmada / pendiente |
+

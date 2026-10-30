@@ -119,3 +119,10 @@ npm run build
 - **Dinero**: solo pastor y tesorero de su iglesia lo ven, y el presbítero en todas las iglesias. Apoyo del pastor y demás cargos: sin acceso (?).
 - Horarios y ubicaciones son **públicos** (sin cuenta); todo lo demás exige sesión.
 - Donaciones y gastos **no se borran**: se anulan con motivo (?). Reporte financiero: donaciones − gastos por iglesia y periodo, sin anulados; el presbítero ve el consolidado.
+- **Miembros**: nombre, teléfono, correo, nacimiento, dirección, estado civil, fecha de bautizo y fecha desde que forman parte de la congregación (sin datos de familia).
+  Estados: activo, inactivo, visitante, en proceso de ganar, de discipular o de consolidar.
+- **Niños y adolescentes**: nombre, nacimiento, dirección, niño/niña (4 a 11 años) o adolescente (12 a 17) y sus tutores.
+- **Asistencia**: el líder de célula marca quién de su célula asistió; el ujier (cargo rotativo) marca quién faltó de quienes no tienen célula.
+- **Ingresos**: se registran **cantidades** por culto o fecha y por tipo (diezmos, ofrendas, EVAMI, talento/venta de comida, otras donaciones con descripción). No se registra quién dio.
+- **Gastos**: categorías luz, agua, renta, mantenimiento, material de construcción, materiales y reposiciones, apoyo a miembros, otros. Tesorería actúa en sujeción al pastor local (flujo de autorización por confirmar (?)).
+
