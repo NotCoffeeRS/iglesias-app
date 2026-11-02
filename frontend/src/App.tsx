@@ -36,7 +36,7 @@ const enrutador = createBrowserRouter([
     path: '/',
     element: layout,
     children: [
-      ...(hayInicio ? [] : [{ index: true, element: <Inicio /> }]),
+      ...(hayInicio ? [] : [{ index: true, element: <Inicio menu={menu} /> }]),
       ...rutas,
       { path: '*', element: <NoEncontrada /> },
     ],

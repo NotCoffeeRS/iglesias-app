@@ -41,8 +41,16 @@ import ListaMiembros from './ListaMiembros'
 
 export const rutas: ModuloRutas['rutas'] = [{ path: '/miembros', element: <ListaMiembros /> }]
 
-// Opcional: enlace en el menú (menor orden = más arriba)
-export const menu: ModuloRutas['menu'] = [{ ruta: '/miembros', etiqueta: 'Miembros', orden: 30 }]
+// Opcional: enlace en el menú (menor orden = más arriba).
+// Con `descripcion`, además aparece como acceso en el mosaico de Inicio.
+export const menu: ModuloRutas['menu'] = [
+  {
+    ruta: '/miembros',
+    etiqueta: 'Miembros',
+    orden: 30,
+    descripcion: 'Registro y estado de cada miembro',
+  },
+]
 
 // Opcional: pantallas sin encabezado ni menú (p. ej. inicio de sesión)
 // export const rutasSinLayout: ModuloRutas['rutasSinLayout'] = [{ path: '/login', element: <Login /> }]
@@ -71,13 +79,33 @@ en español tomado del `detail` de FastAPI. `guardarToken` / `borrarToken` manej
 Si la API responde 401 a una petición que llevaba token (sesión vencida), el cliente borra el token
 y emite el evento `EVENTO_SESION_EXPIRADA` en `window`.
 
+## Diseño
+
+- **Colores por función**, nunca fijos (`bg-white`, `text-slate-700`…). Así la app cambia sola a modo oscuro:
+
+| Clase                               | Uso                                                      |
+| ----------------------------------- | -------------------------------------------------------- |
+| `bg-fondo`                          | Fondo de la página                                       |
+| `bg-superficie` / `bg-superficie-2` | Tarjetas y paneles / zonas hundidas o al pasar el cursor |
+| `border-borde`                      | Bordes y divisiones                                      |
+| `text-texto` / `text-texto-suave`   | Texto principal / secundario                             |
+| `bg-primario text-sobre-primario`   | Botón principal (`hover:bg-primario-hover`)              |
+| `bg-acento text-acento-texto`       | Elemento seleccionado o destacado                        |
+| `text-enlace`                       | Enlaces                                                  |
+| `text-peligro bg-peligro-fondo`     | Errores                                                  |
+
+- **Tipografía:** `font-titulo` (Bricolage Grotesque) en títulos; el texto usa Atkinson Hyperlegible Next.
+  Los `h1`, `h2` y `h3` ya usan `font-titulo`.
+- Esquinas: `rounded-xl` en botones y campos, `rounded-2xl`/`rounded-3xl` en tarjetas.
+- Sin etiquetas en MAYÚSCULAS ni animaciones decorativas; el movimiento solo responde a acciones.
+
 ## Estructura
 
 ```
 src/
   main.tsx            arranque
   App.tsx             enrutador (descubre src/paginas/*/rutas.tsx)
-  index.css           Tailwind y colores (bg-primario, text-acento, …)
+  index.css           Tailwind, tipografías y colores por función (modo claro y oscuro)
   api/cliente.ts      cliente HTTP
   componentes/        Layout, Inicio, NoEncontrada y tipos compartidos
   paginas/<modulo>/   una carpeta por módulo, con su rutas.tsx
