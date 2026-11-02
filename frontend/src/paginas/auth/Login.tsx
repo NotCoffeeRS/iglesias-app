@@ -12,8 +12,8 @@ function mensajeDeError(error: unknown): string {
 }
 
 const claseCampo =
-  'mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base ' +
-  'focus:border-primario focus:outline-none focus:ring-2 focus:ring-acento'
+  'mt-1.5 block w-full rounded-xl border border-borde bg-superficie-2 px-3.5 py-3 text-base text-texto ' +
+  'transition-colors focus:border-enlace focus:bg-superficie focus:outline-none focus:ring-2 focus:ring-acento'
 
 export default function Login() {
   const navegar = useNavigate()
@@ -43,24 +43,33 @@ export default function Login() {
   return (
     <main className="flex min-h-dvh items-center justify-center bg-fondo px-4 py-10">
       <div className="w-full max-w-sm">
-        <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold text-primario">Iglesias App</h1>
-          <p className="mt-1 text-slate-600">Presbiterio de la 3ra IAFCJ</p>
+        <div className="mb-8">
+          <h1
+            className="text-5xl font-extrabold tracking-tight text-primario"
+            style={{ fontStretch: '85%' }}
+          >
+            Iglesias
+          </h1>
+          <p className="mt-1 text-texto-suave">Presbiterio de la 3ra IAFCJ</p>
         </div>
 
-        <form onSubmit={enviar} className="rounded-2xl bg-white p-6 shadow-sm" noValidate>
-          <h2 className="text-lg font-semibold text-slate-800">Iniciar sesión</h2>
+        <form
+          onSubmit={enviar}
+          className="rounded-3xl border border-borde bg-superficie p-6 shadow-sm"
+          noValidate
+        >
+          <h2 className="text-xl font-semibold">Iniciar sesión</h2>
 
           {error && (
             <p
               role="alert"
-              className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+              className="mt-4 rounded-xl bg-peligro-fondo px-3.5 py-2.5 text-sm text-peligro"
             >
               {error}
             </p>
           )}
 
-          <label className="mt-4 block text-sm font-medium text-slate-700">
+          <label className="mt-5 block text-sm font-semibold text-texto">
             Usuario
             <input
               type="text"
@@ -75,7 +84,7 @@ export default function Login() {
             />
           </label>
 
-          <label className="mt-4 block text-sm font-medium text-slate-700">
+          <label className="mt-4 block text-sm font-semibold text-texto">
             Contraseña
             <input
               type="password"
@@ -91,7 +100,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={enviando || !usuario.trim() || !contrasena}
-            className="mt-6 w-full rounded-lg bg-primario px-4 py-3 text-base font-semibold text-white hover:bg-primario-claro disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-6 w-full rounded-xl bg-primario px-4 py-3 text-base font-semibold text-sobre-primario transition-colors hover:bg-primario-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {enviando ? 'Entrando…' : 'Entrar'}
           </button>
