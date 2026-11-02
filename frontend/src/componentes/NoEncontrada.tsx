@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom'
 
 export default function NoEncontrada() {
   return (
-    <section className="py-10 text-center">
-      <h1 className="text-2xl font-bold text-primario">Página no encontrada</h1>
-      <p className="mt-2 text-slate-600">La dirección que buscas no existe.</p>
+    <section className="py-12 text-center">
+      <p className="font-titulo text-7xl font-bold text-acento">404</p>
+      <h1 className="mt-2 text-2xl font-bold">Esta página no existe</h1>
+      <p className="mt-2 text-texto-suave">Revisa la dirección o vuelve al inicio.</p>
       <Link
         to="/"
-        className="mt-6 inline-block rounded-lg bg-primario px-5 py-2.5 font-medium text-white hover:bg-primario-claro"
+        className="mt-6 inline-block rounded-xl bg-primario px-5 py-2.5 font-semibold text-sobre-primario hover:bg-primario-hover"
       >
         Volver al inicio
       </Link>
