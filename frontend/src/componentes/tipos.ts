@@ -9,6 +9,8 @@ export interface EntradaMenu {
   etiqueta: string
   /** Menor número = más arriba. Sin orden va al final. */
   orden?: number
+  /** Si se indica, el módulo aparece como acceso en el mosaico de Inicio con este texto. */
+  descripcion?: string
 }
 
 /**
