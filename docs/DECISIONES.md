@@ -23,5 +23,4 @@ Las decisiones están **propuestas** hasta que Marcos las marque como *confirmad
 | D16 | 2026-10-30 | Asistencia: la marca el líder de célula; para quienes no tienen célula, el ujier (cargo rotativo) anota quién faltó. | confirmada (clienta) |
 | D17 | 2026-10-30 | Ingresos por cantidades y tipo (diezmos, ofrendas, EVAMI, talento, otras con descripción); no se registra quién dio. Reemplaza el campo "miembro opcional" de donaciones. | confirmada (clienta) |
 | D18 | 2026-10-30 | Gastos con lista fija de categorías; la tesorería está en sujeción al pastor local. Detalle de la autorización por confirmar. | confirmada / pendiente |
-
 | D19 | 2026-11-02 | Nadie crea ni asigna un cargo con más acceso al dinero del que tiene: el apoyo del pastor solo crea cargos sin dinero; el pastor puede crear al tesorero de su iglesia; solo el presbítero crea pastores. Lo propuso Jessica; evita obtener el dinero por otra cuenta. | confirmada (Marcos) |
