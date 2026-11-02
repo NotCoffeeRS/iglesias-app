@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { obtenerIglesiasPublicas, type IglesiaPublica } from '../../api/publico'
 import TarjetaIglesia from './TarjetaIglesia'
@@ -8,15 +8,41 @@ type Estado =
 
 function Esqueleto() {
   return (
-    <div className="space-y-4" aria-hidden="true">
+    <div className="grid gap-4 md:grid-cols-2" aria-hidden="true">
       {[0, 1].map((i) => (
-        <div key={i} className="animate-pulse rounded-2xl bg-white p-6 shadow-sm">
-          <div className="h-6 w-2/3 rounded bg-slate-200" />
-          <div className="mt-3 h-4 w-1/2 rounded bg-slate-200" />
-          <div className="mt-6 h-24 rounded-xl bg-slate-100" />
+        <div key={i} className="animate-pulse rounded-3xl border border-borde bg-superficie p-6">
+          <div className="h-7 w-2/3 rounded-lg bg-superficie-2" />
+          <div className="mt-3 h-4 w-1/2 rounded bg-superficie-2" />
+          <div className="mt-6 h-28 rounded-2xl bg-superficie-2" />
         </div>
       ))}
     </div>
+  )
+}
+
+/** Título con tipografía cinética: se ensancha y gana peso una sola vez al cargar. */
+function TituloCinetico() {
+  const titulo = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reducir || !titulo.current?.animate) return
+    titulo.current.animate(
+      [
+        { fontStretch: '75%', fontWeight: 500, opacity: 0.4 },
+        { fontStretch: '100%', fontWeight: 800, opacity: 1 },
+      ],
+      { duration: 900, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' },
+    )
+  }, [])
+
+  return (
+    <h1
+      ref={titulo}
+      className="text-[2.75rem] leading-[0.95] font-extrabold tracking-tight text-primario md:text-7xl"
+    >
+      Horarios y ubicaciones
+    </h1>
   )
 }
 
@@ -42,68 +68,82 @@ export default function HorariosPublicos() {
 
   return (
     <div className="min-h-dvh bg-fondo">
-      <header className="bg-primario text-white">
-        <div className="mx-auto flex max-w-3xl items-start justify-between gap-4 px-4 pt-5 pb-6">
-          <div>
-            <p className="text-sm text-acento">Presbiterio de la 3ra IAFCJ</p>
-            <h1 className="mt-1 text-2xl font-bold">Horarios y ubicaciones</h1>
-          </div>
+      <header className="sticky top-0 z-30 border-b border-borde/70 bg-fondo/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
+          <span className="font-titulo text-xl font-bold tracking-tight text-primario">
+            Iglesias
+          </span>
           <Link
             to="/login"
-            className="shrink-0 rounded-lg border border-white/40 px-3 py-1.5 text-sm font-medium hover:bg-white/10"
+            className="rounded-xl px-3 py-2 text-sm font-semibold text-enlace hover:bg-superficie-2"
           >
             Iniciar sesión
           </Link>
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-5">
-        {estado.tipo === 'cargando' && <Esqueleto />}
+      <main className="mx-auto max-w-5xl px-4 pt-8 pb-12 md:pt-14">
+        <TituloCinetico />
+        <p className="mt-4 max-w-prose text-lg text-texto-suave">
+          Las iglesias del Presbiterio de la 3ra IAFCJ: cuándo nos reunimos y cómo llegar.
+        </p>
 
-        {estado.tipo === 'error' && (
-          <div role="alert" className="rounded-2xl bg-white p-6 text-center shadow-sm">
-            <p className="text-slate-700">No se pudieron cargar los horarios.</p>
-            <button
-              type="button"
-              onClick={reintentar}
-              className="mt-4 rounded-lg bg-primario px-5 py-2.5 font-medium text-white hover:bg-primario-claro"
+        <div className="mt-8">
+          {estado.tipo === 'cargando' && <Esqueleto />}
+
+          {estado.tipo === 'error' && (
+            <div
+              role="alert"
+              className="rounded-3xl border border-borde bg-superficie p-6 text-center"
             >
-              Reintentar
-            </button>
-          </div>
-        )}
-
-        {estado.tipo === 'listo' && estado.iglesias.length === 0 && (
-          <p className="rounded-2xl bg-white p-6 text-center text-slate-600 shadow-sm">
-            Todavía no hay iglesias publicadas.
-          </p>
-        )}
-
-        {estado.tipo === 'listo' && estado.iglesias.length > 0 && (
-          <>
-            {estado.iglesias.length > 1 && (
-              <nav aria-label="Ir a una iglesia" className="-mx-4 mb-4 overflow-x-auto px-4">
-                <ul className="flex gap-2">
-                  {estado.iglesias.map((iglesia) => (
-                    <li key={iglesia.id} className="shrink-0">
-                      <a
-                        href={`#iglesia-${iglesia.id}`}
-                        className="block rounded-full border border-primario/20 bg-white px-3 py-1.5 text-sm font-medium text-primario hover:bg-acento/40"
-                      >
-                        {iglesia.nombre}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
-            <div className="space-y-5">
-              {estado.iglesias.map((iglesia) => (
-                <TarjetaIglesia key={iglesia.id} iglesia={iglesia} />
-              ))}
+              <p className="font-semibold">No se pudieron cargar los horarios.</p>
+              <p className="mt-1 text-texto-suave">Revisa tu conexión e inténtalo otra vez.</p>
+              <button
+                type="button"
+                onClick={reintentar}
+                className="mt-4 rounded-xl bg-primario px-5 py-2.5 font-semibold text-sobre-primario hover:bg-primario-hover"
+              >
+                Reintentar
+              </button>
             </div>
-          </>
-        )}
+          )}
+
+          {estado.tipo === 'listo' && estado.iglesias.length === 0 && (
+            <p className="rounded-3xl border border-borde bg-superficie p-6 text-center text-texto-suave">
+              Todavía no hay iglesias publicadas.
+            </p>
+          )}
+
+          {estado.tipo === 'listo' && estado.iglesias.length > 0 && (
+            <>
+              {estado.iglesias.length > 1 && (
+                <nav
+                  aria-label="Ir a una iglesia"
+                  className="-mx-4 mb-5 overflow-x-auto px-4 [scrollbar-width:none]"
+                >
+                  <ul className="flex gap-2">
+                    {estado.iglesias.map((iglesia) => (
+                      <li key={iglesia.id} className="shrink-0">
+                        <a
+                          href={`#iglesia-${iglesia.id}`}
+                          className="block rounded-full border border-borde bg-superficie px-4 py-2 text-sm font-semibold text-texto hover:bg-acento hover:text-acento-texto"
+                        >
+                          {iglesia.nombre}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              )}
+              {/* Mosaico: la iglesia con varias sedes ocupa todo el ancho */}
+              <div className="grid gap-4 md:grid-cols-2 md:gap-5">
+                {estado.iglesias.map((iglesia) => (
+                  <TarjetaIglesia key={iglesia.id} iglesia={iglesia} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </main>
     </div>
   )
