@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router-dom'
 import Inicio from './componentes/Inicio'
 import Layout from './componentes/Layout'
@@ -22,10 +23,18 @@ const menu: EntradaMenu[] = modulos
 // Si ningún módulo define la ruta "/", se muestra la bienvenida por defecto.
 const hayInicio = rutas.some((r) => r.index || r.path === '/' || r.path === '')
 
+// Los envoltorios de los módulos (p. ej. exigir sesión) rodean al layout y a todas sus rutas.
+const layout = modulos
+  .flatMap((m) => (m.envoltorio ? [m.envoltorio] : []))
+  .reduceRight<ReactNode>(
+    (hijo, Envoltorio) => <Envoltorio>{hijo}</Envoltorio>,
+    <Layout menu={menu} />,
+  )
+
 const enrutador = createBrowserRouter([
   {
     path: '/',
-    element: <Layout menu={menu} />,
+    element: layout,
     children: [
       ...(hayInicio ? [] : [{ index: true, element: <Inicio /> }]),
       ...rutas,

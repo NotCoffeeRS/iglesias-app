@@ -1,3 +1,4 @@
+import type { ComponentType, ReactNode } from 'react'
 import type { RouteObject } from 'react-router-dom'
 
 /** Un enlace del menú principal. */
@@ -21,4 +22,9 @@ export interface ModuloRutas {
   rutasSinLayout?: RouteObject[]
   /** Enlaces que el módulo agrega al menú. */
   menu?: EntradaMenu[]
+  /**
+   * Componente que envuelve a todas las rutas con layout (p. ej. exigir sesión).
+   * Las `rutasSinLayout` no pasan por él, así que ahí van las páginas públicas.
+   */
+  envoltorio?: ComponentType<{ children: ReactNode }>
 }

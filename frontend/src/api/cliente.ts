@@ -8,6 +8,9 @@ export const URL_API: string = (import.meta.env.VITE_API_URL ?? 'http://localhos
 
 const CLAVE_TOKEN = 'iglesias.token'
 
+/** Se emite en `window` cuando la API rechaza el token (vencido o alterado) y se borra la sesión. */
+export const EVENTO_SESION_EXPIRADA = 'iglesias:sesion-expirada'
+
 export function obtenerToken(): string | null {
   try {
     return localStorage.getItem(CLAVE_TOKEN)
@@ -88,6 +91,10 @@ async function peticion<T>(metodo: Metodo, ruta: string, cuerpo?: unknown): Prom
   }
 
   if (!respuesta.ok) {
+    if (respuesta.status === 401 && token) {
+      borrarToken()
+      window.dispatchEvent(new Event(EVENTO_SESION_EXPIRADA))
+    }
     throw new ErrorApi(respuesta.status, mensajeDeError(respuesta.status, datos), datos)
   }
   return datos as T

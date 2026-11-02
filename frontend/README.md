@@ -51,6 +51,9 @@ export const menu: ModuloRutas['menu'] = [{ ruta: '/miembros', etiqueta: 'Miembr
 - `rutas` se muestran dentro del layout (encabezado y menú).
 - Si ningún módulo define `/`, se muestra la bienvenida de `componentes/Inicio.tsx`.
 - Cualquier ruta desconocida muestra `componentes/NoEncontrada.tsx`.
+- Un módulo puede exportar `envoltorio`, un componente que rodea al layout y a **todas** sus rutas
+  (lo usa el módulo de sesión para mandar al login a quien no tenga sesión). Las páginas públicas,
+  como horarios y ubicaciones, van en `rutasSinLayout` para no pasar por él.
 
 ## Llamar a la API
 
@@ -65,6 +68,8 @@ await api.post('/miembros', { nombre: 'Ana Ejemplo' })
 
 Si la respuesta no es exitosa lanza `ErrorApi` con `estado` (código HTTP, `0` sin conexión) y un mensaje
 en español tomado del `detail` de FastAPI. `guardarToken` / `borrarToken` manejan la sesión.
+Si la API responde 401 a una petición que llevaba token (sesión vencida), el cliente borra el token
+y emite el evento `EVENTO_SESION_EXPIRADA` en `window`.
 
 ## Estructura
 
