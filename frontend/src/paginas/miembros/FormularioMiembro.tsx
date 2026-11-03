@@ -271,10 +271,15 @@ export default function FormularioMiembro() {
     id,
   )
 
+  // Si la dirección cambió de un miembro a otro, los datos que quedan son los del anterior:
+  // se ignoran hasta que llegue el que corresponde, para no abrir el formulario con datos ajenos.
+  const vigente =
+    estado.tipo === 'listo' && (id ? estado.datos[0]?.id === Number(id) : !estado.datos[0])
+
   return (
     <section>
       <Volver a="/miembros">Miembros</Volver>
-      {estado.tipo === 'cargando' && (
+      {(estado.tipo === 'cargando' || (estado.tipo === 'listo' && !vigente)) && (
         <div className="mt-3">
           <Cargando />
         </div>
@@ -284,7 +289,7 @@ export default function FormularioMiembro() {
           <ErrorConReintento mensaje={estado.mensaje} reintentar={reintentar} />
         </div>
       )}
-      {estado.tipo === 'listo' && (
+      {estado.tipo === 'listo' && vigente && (
         <Editor key={id ?? 'nuevo'} miembro={estado.datos[0]} iglesias={estado.datos[1]} />
       )}
     </section>
