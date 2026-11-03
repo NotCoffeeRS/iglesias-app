@@ -1,0 +1,103 @@
+@import 'tailwindcss';
+
+/*
+ * Colores por función (tokens semánticos). Cada uno tiene versión clara y oscura, y la app
+ * cambia sola según el celular. En los componentes usa siempre estos nombres
+ * (bg-superficie, text-texto-suave, bg-primario text-sobre-primario...), nunca colores fijos.
+ *
+ * Paleta de la marca: #164E59 · #287C80 · #A9D2CC · #F1E9D8 · #FFFFFF
+ */
+:root {
+  color-scheme: light;
+  --c-fondo: #f1e9d8;
+  --c-superficie: #ffffff;
+  --c-superficie-2: #f8f3e8;
+  --c-borde: #e2d7c1;
+  --c-texto: #11343b;
+  --c-texto-suave: #4f6b6f;
+  --c-primario: #164e59;
+  --c-primario-hover: #287c80;
+  --c-sobre-primario: #ffffff;
+  --c-acento: #a9d2cc;
+  --c-acento-texto: #164e59;
+  --c-enlace: #287c80;
+  --c-peligro: #b42318;
+  --c-peligro-fondo: #fdecea;
+  --c-velo: rgb(17 52 59 / 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --c-fondo: #0b2227;
+    --c-superficie: #10313a;
+    --c-superficie-2: #153b44;
+    --c-borde: #23505a;
+    --c-texto: #eaf2ef;
+    --c-texto-suave: #a5c0bc;
+    --c-primario: #a9d2cc;
+    --c-primario-hover: #c4e2dd;
+    --c-sobre-primario: #0b2227;
+    --c-acento: #287c80;
+    --c-acento-texto: #eaf2ef;
+    --c-enlace: #a9d2cc;
+    --c-peligro: #ffb4ab;
+    --c-peligro-fondo: #4a1712;
+    --c-velo: rgb(0 0 0 / 0.55);
+  }
+}
+
+@theme inline {
+  --color-fondo: var(--c-fondo);
+  --color-superficie: var(--c-superficie);
+  --color-superficie-2: var(--c-superficie-2);
+  --color-borde: var(--c-borde);
+  --color-texto: var(--c-texto);
+  --color-texto-suave: var(--c-texto-suave);
+  --color-primario: var(--c-primario);
+  --color-primario-hover: var(--c-primario-hover);
+  --color-sobre-primario: var(--c-sobre-primario);
+  --color-acento: var(--c-acento);
+  --color-acento-texto: var(--c-acento-texto);
+  --color-enlace: var(--c-enlace);
+  --color-peligro: var(--c-peligro);
+  --color-peligro-fondo: var(--c-peligro-fondo);
+  --color-velo: var(--c-velo);
+}
+
+/* Tipografías variables: títulos con Bricolage Grotesque, texto con Atkinson Hyperlegible Next. */
+@theme {
+  --font-sans: 'Atkinson Hyperlegible Next Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-titulo: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-fondo font-sans text-texto antialiased;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-titulo text-balance;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--c-enlace);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
