@@ -5,6 +5,8 @@ con solo hacer `import app.modelos`.
 """
 
 from app.modelos.asistencia import Asistencia
+from app.modelos.comunicados import Comunicado
+from app.modelos.eventos import Evento
 from app.modelos.gastos import Gasto
 from app.modelos.grupos import Grupo, GrupoMiembro
 from app.modelos.iglesias import Iglesia
@@ -16,6 +18,8 @@ from app.modelos.usuarios import CARGOS, Usuario
 __all__ = [
     "CARGOS",
     "Asistencia",
+    "Comunicado",
+    "Evento",
     "Gasto",
     "Grupo",
     "GrupoMiembro",
