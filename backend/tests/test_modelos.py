@@ -24,7 +24,7 @@ from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from sqlalchemy import create_engine, delete, inspect, text
+from sqlalchemy import create_engine, delete, inspect, select, text
 from sqlalchemy.engine import URL, make_url
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.orm import Session
@@ -55,6 +55,7 @@ from app.modelos.listas import (
     TIPOS_GRUPO,
     TIPOS_INGRESO,
     TIPOS_SERVICIO,
+    TIPOS_SERVICIO_ASISTENCIA,
 )
 from app.modelos.utilidades import obtener_url_base_datos
 
@@ -224,8 +225,12 @@ def test_bajar_solo_la_0002_deja_intacto_el_primer_pr(base_temporal: URL) -> Non
     motor = create_engine(base_temporal)
     try:
         command.upgrade(config, "head")
+        # La 0002 agrega la columna usuarios.miembro_id con ALTER TABLE.
+        assert "miembro_id" in {c["name"] for c in inspect(motor).get_columns("usuarios")}
         command.downgrade(config, "0001")
         assert set(inspect(motor).get_table_names()) == TABLAS_PRIMER_PR | {"alembic_version"}
+        # Al bajar la 0002, `usuarios` vuelve a quedar exactamente como la dejó la 0001.
+        assert "miembro_id" not in {c["name"] for c in inspect(motor).get_columns("usuarios")}
         command.upgrade(config, "head")  # y se puede volver a subir
         assert set(inspect(motor).get_table_names()) == TABLAS_ESPERADAS | {"alembic_version"}
     finally:
@@ -338,6 +343,12 @@ def _miembro(sesion: Session, iglesia: Iglesia, estado: str = "activo") -> Miemb
     return _guardar(sesion, Miembro(nombre=nombre, iglesia_id=iglesia.id, estado=estado))
 
 
+def _iglesia_y_lider(sesion: Session) -> tuple[Iglesia, Miembro]:
+    """Una iglesia y un miembro ficticio que puede dirigir un grupo (el líder es un MIEMBRO)."""
+    iglesia = _crear_iglesia(sesion)
+    return iglesia, _miembro(sesion, iglesia)
+
+
 def _sede(sesion: Session, iglesia: Iglesia, nombre: str | None = None) -> Sede:
     """Una sede de la iglesia dada."""
     sede = Sede(
@@ -348,13 +359,13 @@ def _sede(sesion: Session, iglesia: Iglesia, nombre: str | None = None) -> Sede:
     return _guardar(sesion, sede)
 
 
-def _grupo(sesion: Session, iglesia: Iglesia, lider: Usuario, tipo: str = "celula") -> Grupo:
+def _grupo(sesion: Session, iglesia: Iglesia, lider: Miembro, tipo: str = "celula") -> Grupo:
     """Un grupo del tipo dado, liderado por `lider`."""
     grupo = Grupo(
         iglesia_id=iglesia.id,
         tipo=tipo,
         nombre=f"Grupo {uuid.uuid4().hex[:6]}",
-        lider_usuario_id=lider.id,
+        lider_miembro_id=lider.id,
     )
     return _guardar(sesion, grupo)
 
@@ -427,6 +438,9 @@ def test_las_listas_cerradas_tienen_los_valores_del_issue() -> None:
     """6 estados de miembro, 8 tipos de servicio, 5 de ingreso y 8 categorías de gasto (#4)."""
     assert len(ESTADOS_MIEMBRO) == 6
     assert len(TIPOS_SERVICIO) == 8
+    # Las asistencias aceptan esos 8 más "otro" (D16); horarios e ingresos, solo los 8.
+    assert TIPOS_SERVICIO_ASISTENCIA == (*TIPOS_SERVICIO, "otro")
+    assert "otro" not in TIPOS_SERVICIO
     assert len(TIPOS_INGRESO) == 5
     assert len(CATEGORIAS_GASTO) == 8
     assert len(TIPOS_GRUPO) == 5
@@ -488,14 +502,14 @@ def test_tipo_de_servicio_invalido_se_rechaza(sesion: Session) -> None:
 @pytest.mark.parametrize("tipo", TIPOS_GRUPO)
 def test_cada_tipo_de_grupo_se_acepta(sesion: Session, tipo: str) -> None:
     """Los 5 tipos de grupo se pueden guardar."""
-    iglesia, lider = _base(sesion)
+    iglesia, lider = _iglesia_y_lider(sesion)
     assert _grupo(sesion, iglesia, lider, tipo).id is not None
 
 
 def test_tipo_de_grupo_invalido_se_rechaza(sesion: Session) -> None:
     """Un tipo de grupo fuera de la lista falla por el CHECK."""
-    iglesia, lider = _base(sesion)
-    sesion.add(Grupo(iglesia_id=iglesia.id, tipo="club", nombre="Club", lider_usuario_id=lider.id))
+    iglesia, lider = _iglesia_y_lider(sesion)
+    sesion.add(Grupo(iglesia_id=iglesia.id, tipo="club", nombre="Club", lider_miembro_id=lider.id))
     with pytest.raises(IntegrityError, match="ck_grupos_tipo"):
         sesion.flush()
 
@@ -722,14 +736,14 @@ def test_un_tutor_necesita_nombre_y_telefono(sesion: Session) -> None:
 
 def test_el_lider_y_el_asistente_no_pueden_ser_la_misma_persona(sesion: Session) -> None:
     """El líder y el asistente de un grupo deben ser personas distintas."""
-    iglesia, lider = _base(sesion)
+    iglesia, lider = _iglesia_y_lider(sesion)
     sesion.add(
         Grupo(
             iglesia_id=iglesia.id,
             tipo="celula",
             nombre="Célula uno",
-            lider_usuario_id=lider.id,
-            asistente_usuario_id=lider.id,
+            lider_miembro_id=lider.id,
+            asistente_miembro_id=lider.id,
         )
     )
     with pytest.raises(IntegrityError, match="ck_grupos_lider_distinto_asistente"):
@@ -740,24 +754,24 @@ def test_un_grupo_necesita_lider(sesion: Session) -> None:
     """El líder es obligatorio (#4: grupos "con líder y asistente")."""
     iglesia = _crear_iglesia(sesion)
     sesion.add(Grupo(iglesia_id=iglesia.id, tipo="celula", nombre="Sin líder"))
-    with pytest.raises(IntegrityError, match="lider_usuario_id"):
+    with pytest.raises(IntegrityError, match="lider_miembro_id"):
         sesion.flush()
 
 
 def test_el_asistente_de_un_grupo_es_opcional(sesion: Session) -> None:
     """Un grupo puede no tener asistente."""
-    iglesia, lider = _base(sesion)
-    assert _grupo(sesion, iglesia, lider).asistente_usuario_id is None
+    iglesia, lider = _iglesia_y_lider(sesion)
+    assert _grupo(sesion, iglesia, lider).asistente_miembro_id is None
 
 
 def test_el_nombre_de_un_grupo_no_se_repite_en_su_iglesia_y_tipo(sesion: Session) -> None:
     """Dos grupos del mismo tipo y la misma iglesia no pueden llamarse igual."""
-    iglesia, lider = _base(sesion)
+    iglesia, lider = _iglesia_y_lider(sesion)
     datos = {
         "iglesia_id": iglesia.id,
         "tipo": "celula",
         "nombre": "Célula Norte",
-        "lider_usuario_id": lider.id,
+        "lider_miembro_id": lider.id,
     }
     _guardar(sesion, Grupo(**datos))
     sesion.add(Grupo(**datos))
@@ -767,7 +781,7 @@ def test_el_nombre_de_un_grupo_no_se_repite_en_su_iglesia_y_tipo(sesion: Session
 
 def test_un_miembro_solo_puede_estar_en_una_celula(sesion: Session) -> None:
     """La segunda célula de un miembro se rechaza (suposición del #22, pendiente)."""
-    iglesia, lider = _base(sesion)
+    iglesia, lider = _iglesia_y_lider(sesion)
     miembro = _miembro(sesion, iglesia)
     primera, segunda = _grupo(sesion, iglesia, lider), _grupo(sesion, iglesia, lider)
     _guardar(sesion, GrupoMiembro(grupo_id=primera.id, miembro_id=miembro.id, tipo_grupo="celula"))
@@ -778,7 +792,7 @@ def test_un_miembro_solo_puede_estar_en_una_celula(sesion: Session) -> None:
 
 def test_un_miembro_puede_estar_en_varios_ministerios(sesion: Session) -> None:
     """La regla de "una sola" es solo para células: los ministerios pueden ser varios (#22)."""
-    iglesia, lider = _base(sesion)
+    iglesia, lider = _iglesia_y_lider(sesion)
     miembro = _miembro(sesion, iglesia)
     for _ in range(2):
         ministerio = _grupo(sesion, iglesia, lider, "ministerio")
@@ -790,7 +804,7 @@ def test_el_tipo_copiado_en_grupo_miembros_debe_coincidir_con_el_del_grupo(
     sesion: Session,
 ) -> None:
     """No se puede decir que un ministerio es una célula (la llave compuesta lo impide)."""
-    iglesia, lider = _base(sesion)
+    iglesia, lider = _iglesia_y_lider(sesion)
     miembro = _miembro(sesion, iglesia)
     ministerio = _grupo(sesion, iglesia, lider, "ministerio")
     sesion.add(GrupoMiembro(grupo_id=ministerio.id, miembro_id=miembro.id, tipo_grupo="celula"))
@@ -890,3 +904,114 @@ def test_no_se_borra_un_miembro_con_asistencias(sesion: Session) -> None:
     _guardar(sesion, _marca(miembro, usuario, "culto_domingo"))
     with pytest.raises(IntegrityError, match="fk_asistencias_miembro_id"):
         sesion.execute(delete(Miembro).where(Miembro.id == miembro.id))
+
+
+# --- Cambio A: el líder es un miembro y usuarios.miembro_id -------------------
+
+
+def test_el_asistente_puede_ser_otro_miembro(sesion: Session) -> None:
+    """El asistente (o segundo al mando) es otro miembro distinto del líder (#20)."""
+    iglesia, lider = _iglesia_y_lider(sesion)
+    asistente = _miembro(sesion, iglesia)
+    grupo = Grupo(
+        iglesia_id=iglesia.id,
+        tipo="celula",
+        nombre="Célula con asistente",
+        lider_miembro_id=lider.id,
+        asistente_miembro_id=asistente.id,
+    )
+    assert _guardar(sesion, grupo).asistente_miembro_id == asistente.id
+
+
+def test_el_lider_de_un_grupo_debe_ser_un_miembro_que_exista(sesion: Session) -> None:
+    """El líder es una llave hacia `miembros`: un id inexistente se rechaza."""
+    iglesia = _crear_iglesia(sesion)
+    sesion.add(
+        Grupo(iglesia_id=iglesia.id, tipo="celula", nombre="Líder fantasma", lider_miembro_id=-1)
+    )
+    with pytest.raises(IntegrityError, match="fk_grupos_lider_miembro_id"):
+        sesion.flush()
+
+
+def test_los_usuarios_no_tienen_columna_de_area() -> None:
+    """El "área" de un usuario no es una columna: sale de los grupos que dirige su miembro."""
+    columnas = Usuario.__table__.columns.keys()
+    assert "area" not in columnas
+    assert "miembro_id" in columnas
+
+
+def test_un_miembro_no_puede_tener_dos_cuentas(sesion: Session) -> None:
+    """Dos usuarios no pueden ligarse al mismo miembro (índice único uq_usuarios_miembro_id)."""
+    iglesia = _crear_iglesia(sesion)
+    miembro = _miembro(sesion, iglesia)
+    primera = _nuevo_usuario(f"cuenta.{uuid.uuid4().hex[:8]}", "lider_celula", iglesia.id)
+    primera.miembro_id = miembro.id
+    _guardar(sesion, primera)  # la primera cuenta del miembro se guarda bien
+    segunda = _nuevo_usuario(f"cuenta.{uuid.uuid4().hex[:8]}", "ujier", iglesia.id)
+    segunda.miembro_id = miembro.id
+    sesion.add(segunda)
+    with pytest.raises(IntegrityError, match="uq_usuarios_miembro_id"):
+        sesion.flush()
+
+
+def test_varias_cuentas_pueden_no_tener_ficha_de_miembro(sesion: Session) -> None:
+    """`miembro_id` es opcional: varias cuentas pueden quedar sin ficha de miembro."""
+    iglesia = _crear_iglesia(sesion)
+    for cargo in ("pastor", "tesorero"):
+        usuario = _nuevo_usuario(f"sin.ficha.{cargo}.{uuid.uuid4().hex[:6]}", cargo, iglesia.id)
+        assert _guardar(sesion, usuario).miembro_id is None
+
+
+def test_el_miembro_de_una_cuenta_debe_existir(sesion: Session) -> None:
+    """`usuarios.miembro_id` es una llave hacia `miembros`: un id inexistente se rechaza."""
+    iglesia = _crear_iglesia(sesion)
+    usuario = _nuevo_usuario("cuenta.con.miembro.fantasma", "pastor", iglesia.id)
+    usuario.miembro_id = -1
+    sesion.add(usuario)
+    with pytest.raises(IntegrityError, match="fk_usuarios_miembro_id"):
+        sesion.flush()
+
+
+def test_el_area_de_un_usuario_sale_de_los_grupos_que_dirige_su_miembro(sesion: Session) -> None:
+    """Con usuarios.miembro_id = grupos.lider_miembro_id se encuentran los grupos de la cuenta."""
+    iglesia = _crear_iglesia(sesion)
+    lider = _miembro(sesion, iglesia)
+    cuenta = _nuevo_usuario(f"lider.{uuid.uuid4().hex[:8]}", "lider_celula", iglesia.id)
+    cuenta.miembro_id = lider.id
+    _guardar(sesion, cuenta)
+    celula = _grupo(sesion, iglesia, lider, "celula")
+    _grupo(sesion, iglesia, _miembro(sesion, iglesia), "ministerio")  # lo dirige otra persona
+
+    consulta = (
+        select(Grupo.id)
+        .join(Usuario, Usuario.miembro_id == Grupo.lider_miembro_id)
+        .where(Usuario.id == cuenta.id)
+    )
+    assert sesion.scalars(consulta).all() == [celula.id]
+
+
+# --- Cambio B: "otro" solo en asistencias ------------------------------------
+
+
+@pytest.mark.parametrize("servicio", TIPOS_SERVICIO_ASISTENCIA)
+def test_cada_servicio_de_asistencia_se_acepta(sesion: Session, servicio: str) -> None:
+    """Las asistencias aceptan los 8 tipos de servicio y también "otro" (D16)."""
+    iglesia, usuario = _base(sesion)
+    miembro = _miembro(sesion, iglesia)
+    assert _guardar(sesion, _marca(miembro, usuario, servicio)).id is not None
+
+
+def test_otro_se_rechaza_en_horarios(sesion: Session) -> None:
+    """Los horarios siguen con los 8 tipos del #4: "otro" no vale."""
+    sede = _sede(sesion, _crear_iglesia(sesion))
+    sesion.add(Horario(sede_id=sede.id, tipo="otro", dia="domingo", hora_inicio=time(10, 0)))
+    with pytest.raises(IntegrityError, match="ck_horarios_tipo"):
+        sesion.flush()
+
+
+def test_otro_se_rechaza_en_ingresos(sesion: Session) -> None:
+    """Los ingresos por culto siguen con los 8 tipos del #4: "otro" no vale."""
+    iglesia, usuario = _base(sesion)
+    sesion.add(_nuevo_ingreso(iglesia, usuario, tipo_servicio="otro"))
+    with pytest.raises(IntegrityError, match="ck_ingresos_tipo_servicio"):
+        sesion.flush()
