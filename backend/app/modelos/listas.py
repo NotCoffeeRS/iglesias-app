@@ -6,7 +6,7 @@ que traducirlas. Si hay que agregar un valor, se hace con una migración nueva q
 cambie el CHECK correspondiente.
 """
 
-# Tipos de servicio (8): horarios, asistencias e ingresos por culto (Issues #4 y #14).
+# Tipos de servicio (8): horarios e ingresos por culto (Issues #4 y #14).
 TIPOS_SERVICIO = (
     "culto_domingo",
     "culto_entre_semana",
@@ -17,6 +17,11 @@ TIPOS_SERVICIO = (
     "celula",
     "ministerio",
 )
+
+# Servicios de una asistencia: los 8 de arriba MÁS "otro". La decisión D16 dice que el
+# líder marca la asistencia al culto "domingo, miércoles u otro día", y la pantalla de
+# asistencia (PR #47) ya usa "otro". Horarios e ingresos siguen con los 8 (Issue #4).
+TIPOS_SERVICIO_ASISTENCIA = TIPOS_SERVICIO + ("otro",)
 
 # Días de la semana de un horario (la lista la propone el frontend, Issue #15).
 DIAS_SEMANA = (

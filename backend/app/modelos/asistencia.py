@@ -21,7 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
-from app.modelos.listas import TIPOS_SERVICIO
+from app.modelos.listas import TIPOS_SERVICIO_ASISTENCIA
 from app.modelos.utilidades import lista_sql
 
 
@@ -39,7 +39,8 @@ class Asistencia(Base):
 
     fecha: Mapped[date] = mapped_column(Date, nullable=False)
 
-    # Servicio al que corresponde (domingo, entre semana u otro de la lista de 8).
+    # Servicio al que corresponde: uno de los 8 tipos de servicio o "otro" (D16: el culto
+    # puede ser "domingo, miércoles u otro día").
     tipo_servicio: Mapped[str] = mapped_column(String(20), nullable=False)
 
     # Verdadero = asistió; falso = faltó.
@@ -56,7 +57,8 @@ class Asistencia(Base):
 
     __table_args__ = (
         CheckConstraint(
-            f"tipo_servicio IN ({lista_sql(TIPOS_SERVICIO)})", name="ck_asistencias_tipo_servicio"
+            f"tipo_servicio IN ({lista_sql(TIPOS_SERVICIO_ASISTENCIA)})",
+            name="ck_asistencias_tipo_servicio",
         ),
         # Una persona no se marca dos veces el mismo día y servicio (Issue #23).
         UniqueConstraint(
