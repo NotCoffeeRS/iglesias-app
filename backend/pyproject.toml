@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "API para la gestión de iglesias"
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.13,<2",
     "fastapi>=0.115,<1",
     "pydantic>=2,<3",
     "sqlalchemy>=2.0,<3",
