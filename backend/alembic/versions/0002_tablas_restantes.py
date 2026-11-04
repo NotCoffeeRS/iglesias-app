@@ -1,4 +1,4 @@
-"""Las otras 13 tablas del esquema inicial (segundo PR del Issue #4).
+"""Las otras 13 tablas del esquema inicial y usuarios.miembro_id (segundo PR del Issue #4).
 
 Se encadena con la migración 0001 (iglesias y usuarios) sin modificarla.
 
@@ -29,6 +29,8 @@ TIPOS_SERVICIO = (
     "celula",
     "ministerio",
 )
+# Las asistencias aceptan los 8 tipos MÁS "otro" (D16); horarios e ingresos, solo los 8.
+TIPOS_SERVICIO_ASISTENCIA = TIPOS_SERVICIO + ("otro",)
 DIAS_SEMANA = ("domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sabado")
 TIPOS_RED_SOCIAL = ("propia", "relacionada")
 ESTADOS_MIEMBRO = (
@@ -161,6 +163,20 @@ def upgrade() -> None:
         ),
     )
 
+    # --- usuarios.miembro_id: liga la cuenta con la ficha de miembro de esa persona ---
+    # Se agrega aquí con ALTER TABLE para NO modificar la migración 0001. Es opcional, y un
+    # miembro tiene a lo sumo una cuenta (índice único; PostgreSQL permite varios vacíos).
+    op.add_column("usuarios", sa.Column("miembro_id", sa.Integer(), nullable=True))
+    op.create_foreign_key(
+        "fk_usuarios_miembro_id",
+        "usuarios",
+        "miembros",
+        ["miembro_id"],
+        ["id"],
+        ondelete="RESTRICT",
+    )
+    op.create_index("uq_usuarios_miembro_id", "usuarios", ["miembro_id"], unique=True)
+
     # --- menores ---
     op.create_table(
         "menores",
@@ -198,29 +214,30 @@ def upgrade() -> None:
         sa.Column("iglesia_id", sa.Integer(), nullable=False),
         sa.Column("tipo", sa.String(12), nullable=False),
         sa.Column("nombre", sa.String(150), nullable=False),
-        sa.Column("lider_usuario_id", sa.Integer(), nullable=False),
-        sa.Column("asistente_usuario_id", sa.Integer(), nullable=True),
+        # El líder y el asistente son MIEMBROS (no usuarios): Issue #20 y pantalla del PR #46.
+        sa.Column("lider_miembro_id", sa.Integer(), nullable=False),
+        sa.Column("asistente_miembro_id", sa.Integer(), nullable=True),
         sa.Column("activo", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(
             ["iglesia_id"], ["iglesias.id"], name="fk_grupos_iglesia_id", ondelete="RESTRICT"
         ),
         sa.ForeignKeyConstraint(
-            ["lider_usuario_id"],
-            ["usuarios.id"],
-            name="fk_grupos_lider_usuario_id",
+            ["lider_miembro_id"],
+            ["miembros.id"],
+            name="fk_grupos_lider_miembro_id",
             ondelete="RESTRICT",
         ),
         sa.ForeignKeyConstraint(
-            ["asistente_usuario_id"],
-            ["usuarios.id"],
-            name="fk_grupos_asistente_usuario_id",
+            ["asistente_miembro_id"],
+            ["miembros.id"],
+            name="fk_grupos_asistente_miembro_id",
             ondelete="RESTRICT",
         ),
         sa.CheckConstraint(f"tipo IN ({_lista(TIPOS_GRUPO)})", name="ck_grupos_tipo"),
         # El líder y el asistente no pueden ser la misma persona.
         sa.CheckConstraint(
-            "asistente_usuario_id IS NULL OR lider_usuario_id <> asistente_usuario_id",
+            "asistente_miembro_id IS NULL OR lider_miembro_id <> asistente_miembro_id",
             name="ck_grupos_lider_distinto_asistente",
         ),
         sa.UniqueConstraint("iglesia_id", "tipo", "nombre", name="uq_grupos_iglesia_tipo_nombre"),
@@ -285,7 +302,8 @@ def upgrade() -> None:
             ondelete="RESTRICT",
         ),
         sa.CheckConstraint(
-            f"tipo_servicio IN ({_lista(TIPOS_SERVICIO)})", name="ck_asistencias_tipo_servicio"
+            f"tipo_servicio IN ({_lista(TIPOS_SERVICIO_ASISTENCIA)})",
+            name="ck_asistencias_tipo_servicio",
         ),
         # Una persona no se marca dos veces el mismo día y servicio.
         sa.UniqueConstraint(
@@ -443,6 +461,10 @@ def downgrade() -> None:
     op.drop_table("grupos")
     op.drop_table("tutores")
     op.drop_table("menores")
+    # Antes de borrar `miembros` hay que quitar de `usuarios` lo que apunta a ella.
+    op.drop_index("uq_usuarios_miembro_id", table_name="usuarios")
+    op.drop_constraint("fk_usuarios_miembro_id", "usuarios", type_="foreignkey")
+    op.drop_column("usuarios", "miembro_id")
     op.drop_table("miembros")
     op.drop_table("horarios")
     op.drop_table("redes_sociales")
