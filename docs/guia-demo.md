@@ -114,6 +114,7 @@ Haz solo estos cuatro pasos (6 minutos): **1** (público), **7** (asistencia), *
   - Quién puede anular, y si el tesorero necesita aprobación del pastor antes de gastar o anular.
   - De dónde sale el "área" de cada usuario.
   - Las opciones de estado civil de un miembro.
+  - Qué ve la esposa de pastor, el diácono, el ministro y el encargado de área.
   - Cómo se cambia o restablece una contraseña.
 
 ## 5. Si algo falla durante la demo

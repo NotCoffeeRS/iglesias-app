@@ -29,8 +29,8 @@ Este manual es corto: primero lo básico, después lo que hace cada cargo y, al 
 | **Red** | Grupo de la iglesia por tipo de persona: de varones, de damas o de jóvenes. Tiene líder. |
 | **Célula** | Grupo con su líder y su asistente. Del líder de célula sale la asistencia. |
 | **Ministerio** | Grupo de servicio de la iglesia, con líder y asistente o "segundo". |
-| **Escuela (IBID)** | Las escuelas de la iglesia. En la app es un tipo de grupo y un tipo de horario. |
-| **DNA** | Uno de los tipos de servicio con horario, junto con culto de domingo, culto entre semana, oración, jóvenes, escuela, célula y ministerio. |
+| **Escuela (IBID)** | IBID es el *Instituto Bíblico Distrital*. En la app, las escuelas son un tipo de grupo y un tipo de horario. |
+| **DNA** | *Discipulando Niños y Adolescentes*. Es uno de los tipos de servicio con horario, junto con culto de domingo, culto entre semana, oración, jóvenes, escuela, célula y ministerio. |
 | **Área** | Un servicio a cargo de alguien, como la tiendita. Es un tipo de grupo. |
 | **Ujier** | Quien está en la puerta. Es un cargo que rota. |
 | **Diezmos y ofrendas** | Dos de los tipos de ingreso. |
@@ -55,7 +55,7 @@ El dinero (ingresos, gastos y reporte) lo ven **solo** el pastor y el tesorero d
 
 - Ve **toda su iglesia**: miembros, grupos, asistencia, dinero y reporte financiero.
 - Edita la ficha y los horarios de **su** iglesia, no los de otra.
-- Crea usuarios de su iglesia con cualquier cargo **menos pastor**; puede crear al **tesorero**.
+- Crea usuarios de su iglesia con cualquier cargo **menos pastor y presbítero**; puede crear al **tesorero**.
 - Crea eventos y comunicados solo para su iglesia.
 
 ### Apoyo del pastor
@@ -95,7 +95,7 @@ El dinero (ingresos, gastos y reporte) lo ven **solo** el pastor y el tesorero d
 
 ### Esposa de pastor, diácono, ministro y encargado de área
 
-- Ven lo de **su área** y no ven el dinero. Un encargado de área cuida un servicio concreto, como la tiendita.
+- Ven lo de **su área** y no ven el dinero *(provisional, pendiente de la clienta)*. Un encargado de área cuida un servicio concreto, como la tiendita.
 - Hoy no hay pantallas propias para estos cargos; si la clienta pide algo más, se agrega después.
 
 ## 4. Cómo se hace cada tarea
