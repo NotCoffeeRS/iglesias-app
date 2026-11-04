@@ -2,12 +2,12 @@
 
 from typing import Literal
 
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, Field, SecretStr
 
 
 class EntradaLogin(BaseModel):
-    usuario: str
-    contrasena: SecretStr
+    usuario: str = Field(min_length=1, max_length=60)
+    contrasena: SecretStr = Field(min_length=1)
 
 
 class RespuestaLogin(BaseModel):
