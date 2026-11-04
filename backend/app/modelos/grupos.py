@@ -39,17 +39,18 @@ class Grupo(Base):
     tipo: Mapped[str] = mapped_column(String(12), nullable=False)
     nombre: Mapped[str] = mapped_column(String(150), nullable=False)
 
-    # Líder obligatorio. Es un USUARIO (con cuenta) porque marca asistencia en la app
-    # (Issue #23); por eso el "área" de un usuario es el grupo que lidera, no una columna
-    # aparte en `usuarios`. Propuesta pendiente de confirmar con Marcos.
-    lider_usuario_id: Mapped[int] = mapped_column(
-        ForeignKey("usuarios.id", ondelete="RESTRICT", name="fk_grupos_lider_usuario_id"),
+    # Líder obligatorio. Es un MIEMBRO (no un usuario), igual que en la pantalla de grupos
+    # (PR #46) y como dice el Issue #20 ("miembros existentes"). Así también puede ser líder
+    # alguien sin cuenta. El "área" de un usuario sale de aquí: son los grupos que dirige el
+    # miembro ligado a su cuenta (`usuarios.miembro_id`); no hay columna `area`.
+    lider_miembro_id: Mapped[int] = mapped_column(
+        ForeignKey("miembros.id", ondelete="RESTRICT", name="fk_grupos_lider_miembro_id"),
         nullable=False,
     )
 
-    # Asistente o segundo al mando (opcional, Issue #20).
-    asistente_usuario_id: Mapped[int | None] = mapped_column(
-        ForeignKey("usuarios.id", ondelete="RESTRICT", name="fk_grupos_asistente_usuario_id")
+    # Asistente o segundo al mando (opcional, Issue #20); también es un miembro.
+    asistente_miembro_id: Mapped[int | None] = mapped_column(
+        ForeignKey("miembros.id", ondelete="RESTRICT", name="fk_grupos_asistente_miembro_id")
     )
 
     activo: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
@@ -58,7 +59,7 @@ class Grupo(Base):
         CheckConstraint(f"tipo IN ({lista_sql(TIPOS_GRUPO)})", name="ck_grupos_tipo"),
         # El líder y el asistente no pueden ser la misma persona.
         CheckConstraint(
-            "asistente_usuario_id IS NULL OR lider_usuario_id <> asistente_usuario_id",
+            "asistente_miembro_id IS NULL OR lider_miembro_id <> asistente_miembro_id",
             name="ck_grupos_lider_distinto_asistente",
         ),
         # No se repite el nombre de un grupo del mismo tipo en la misma iglesia.
