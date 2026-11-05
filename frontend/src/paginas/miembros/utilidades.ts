@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { ErrorApi } from '../../api/cliente'
+import { ErrorApi, esRutaInexistente } from '../../api/cliente'
 import { ESTADOS, type EstadoMiembro } from '../../api/miembros'
 
 export function mensajeDeError(error: unknown, accion: string): string {
   if (error instanceof ErrorApi) {
+    if (esRutaInexistente(error)) return 'Esta función todavía no está disponible.'
     if (error.estado === 0) return 'No se pudo conectar con el servidor. Revisa tu conexión.'
     if (error.estado === 403) return `No tienes permiso para ${accion}.`
     if (error.estado === 404) return 'Este miembro no existe o no está en tu alcance.'
@@ -13,7 +14,9 @@ export function mensajeDeError(error: unknown, accion: string): string {
 }
 
 type Carga<T> =
-  { tipo: 'cargando' } | { tipo: 'error'; mensaje: string } | { tipo: 'listo'; datos: T }
+  | { tipo: 'cargando' }
+  | { tipo: 'error'; mensaje: string; sinPermiso: boolean }
+  | { tipo: 'listo'; datos: T }
 
 /** Pide datos al montar (o al cambiar `dependencia`) y permite reintentar. */
 export function useCarga<T>(pedir: () => Promise<T>, accion: string, dependencia?: unknown) {
@@ -24,7 +27,15 @@ export function useCarga<T>(pedir: () => Promise<T>, accion: string, dependencia
     let vigente = true
     pedir()
       .then((datos) => vigente && setEstado({ tipo: 'listo', datos }))
-      .catch((e) => vigente && setEstado({ tipo: 'error', mensaje: mensajeDeError(e, accion) }))
+      .catch(
+        (e) =>
+          vigente &&
+          setEstado({
+            tipo: 'error',
+            mensaje: mensajeDeError(e, accion),
+            sinPermiso: e instanceof ErrorApi && e.estado === 403,
+          }),
+      )
     return () => {
       vigente = false
     }

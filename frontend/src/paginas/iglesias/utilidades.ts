@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ErrorApi } from '../../api/cliente'
+import { ErrorApi, esRutaInexistente } from '../../api/cliente'
 
 /** Solo enlaces http(s); evita que un dato mal capturado se vuelva un enlace peligroso. */
 export function esEnlaceSeguro(url?: string | null): url is string {
@@ -8,6 +8,7 @@ export function esEnlaceSeguro(url?: string | null): url is string {
 
 export function mensajeDeError(error: unknown, accion: string): string {
   if (error instanceof ErrorApi) {
+    if (esRutaInexistente(error)) return 'Esta función todavía no está disponible.'
     if (error.estado === 0) return 'No se pudo conectar con el servidor. Revisa tu conexión.'
     if (error.estado === 403) return `No tienes permiso para ${accion}.`
     if (error.estado === 404) return 'Esta iglesia no existe o ya no está disponible.'

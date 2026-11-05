@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { ErrorApi } from '../../api/cliente'
+import { ErrorApi, esRutaInexistente } from '../../api/cliente'
 
 export function mensajeDeError(error: unknown, accion: string): string {
   if (error instanceof ErrorApi) {
+    if (esRutaInexistente(error)) return 'Esta función todavía no está disponible.'
     if (error.estado === 0) return 'No se pudo conectar con el servidor. Revisa tu conexión.'
     if (error.estado === 403) return `No tienes permiso para ${accion}.`
     if (error.estado === 404) return 'Este comunicado ya no existe. Recarga la página.'

@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from 'react'
 import type { RouteObject } from 'react-router-dom'
+import type { Cargo } from '../api/usuarios'
 
 /** Un enlace del menú principal. */
 export interface EntradaMenu {
@@ -11,6 +12,8 @@ export interface EntradaMenu {
   orden?: number
   /** Si se indica, el módulo aparece como acceso en el mosaico de Inicio con este texto. */
   descripcion?: string
+  /** Cargos que ven esta entrada. Sin lista, la ven todos (el servidor valida el acceso de todos modos). */
+  cargos?: readonly Cargo[]
 }
 
 /**

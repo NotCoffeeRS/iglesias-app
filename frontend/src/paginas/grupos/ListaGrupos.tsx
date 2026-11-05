@@ -1,7 +1,11 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { listarGrupos, TIPOS_GRUPO, type TipoGrupo } from '../../api/grupos'
+import { obtenerYo } from '../../api/usuarios'
 import { Cargando, ErrorConReintento } from './comunes'
 import { claseBotonPrincipal, nombreTipo, useCarga } from './utilidades'
+
+// Quienes crean grupos (el servidor lo vuelve a validar).
+const CARGOS_QUE_CREAN = ['presbitero', 'pastor', 'apoyo_pastor']
 
 export default function ListaGrupos() {
   const ubicacion = useLocation()
@@ -11,6 +15,9 @@ export default function ListaGrupos() {
     TipoGrupo | undefined
 
   const { estado, reintentar } = useCarga(() => listarGrupos(tipo), 'cargar los grupos', tipo)
+
+  const { estado: sesion } = useCarga(obtenerYo, 'conocer tu cargo')
+  const puedeCrear = sesion.tipo === 'listo' && CARGOS_QUE_CREAN.includes(sesion.datos.cargo)
 
   const grupos =
     estado.tipo === 'listo'
@@ -35,9 +42,11 @@ export default function ListaGrupos() {
             Redes, células, ministerios, escuelas y áreas, con su líder.
           </p>
         </div>
-        <Link to="/grupos/nuevo" className={claseBotonPrincipal}>
-          Crear grupo
-        </Link>
+        {puedeCrear && (
+          <Link to="/grupos/nuevo" className={claseBotonPrincipal}>
+            Crear grupo
+          </Link>
+        )}
       </div>
 
       {aviso && (
@@ -82,13 +91,18 @@ export default function ListaGrupos() {
       <div className="mt-5">
         {estado.tipo === 'cargando' && <Cargando />}
         {estado.tipo === 'error' && (
-          <ErrorConReintento mensaje={estado.mensaje} reintentar={reintentar} />
+          <ErrorConReintento
+            mensaje={estado.mensaje}
+            reintentar={estado.sinPermiso ? undefined : reintentar}
+          />
         )}
         {estado.tipo === 'listo' && grupos.length === 0 && (
           <p className="rounded-3xl border border-borde bg-superficie p-6 text-texto-suave">
-            {tipo
-              ? 'No hay grupos de este tipo. Crea el primero.'
-              : 'Todavía no hay grupos. Crea el primero.'}
+            {!puedeCrear
+              ? 'No hay grupos en tu área.'
+              : tipo
+                ? 'No hay grupos de este tipo. Crea el primero.'
+                : 'Todavía no hay grupos. Crea el primero.'}
           </p>
         )}
         {grupos.length > 0 && (

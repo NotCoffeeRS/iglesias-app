@@ -1,4 +1,5 @@
 import type { ModuloRutas } from '../../componentes/tipos'
+import { CARGOS_QUE_GESTIONAN_USUARIOS } from '../../componentes/cargos'
 import FormularioUsuario from './FormularioUsuario'
 import ListaUsuarios from './ListaUsuarios'
 
@@ -13,6 +14,7 @@ export const menu: ModuloRutas['menu'] = [
     ruta: '/usuarios',
     etiqueta: 'Usuarios',
     orden: 30,
+    cargos: CARGOS_QUE_GESTIONAN_USUARIOS,
     descripcion: 'Cuentas y cargos del liderazgo',
   },
 ]
