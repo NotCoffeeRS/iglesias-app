@@ -48,7 +48,7 @@ export default function Login() {
             className="text-5xl font-extrabold tracking-tight text-primario"
             style={{ fontStretch: '85%' }}
           >
-            Iglesias
+            Tessia
           </h1>
           <p className="mt-1 text-texto-suave">Presbiterio de la 3ra IAFCJ</p>
         </div>

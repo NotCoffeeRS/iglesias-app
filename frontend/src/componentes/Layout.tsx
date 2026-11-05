@@ -19,7 +19,7 @@ function clasesEnlace({ isActive }: { isActive: boolean }) {
 function Marca() {
   return (
     <Link to="/" className="block leading-tight">
-      <span className="font-titulo text-xl font-bold tracking-tight text-primario">Iglesias</span>
+      <span className="font-titulo text-xl font-bold tracking-tight text-primario">Tessia</span>
       <span className="block text-sm text-texto-suave">Presbiterio de la 3ra IAFCJ</span>
     </Link>
   )
