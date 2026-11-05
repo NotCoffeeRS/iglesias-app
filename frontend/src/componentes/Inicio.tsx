@@ -45,7 +45,7 @@ export default function Inicio({ menu }: { menu: EntradaMenu[] }) {
                     <li key={acceso.ruta}>
                       <Link
                         to={acceso.ruta}
-                        className="flex h-full flex-col justify-end rounded-3xl border border-borde bg-superficie p-5 transition-colors hover:bg-superficie-2"
+                        className="flex h-full flex-col justify-end rounded-3xl border border-borde bg-superficie p-5 transition-colors hover:bg-resalte"
                       >
                         <span className="font-titulo text-xl font-semibold text-primario">
                           {acceso.etiqueta}
