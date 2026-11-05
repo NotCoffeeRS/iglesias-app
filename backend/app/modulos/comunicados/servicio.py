@@ -121,7 +121,9 @@ def _confirmar(sesion: Session, comunicado: Comunicado) -> ComunicadoSalida:
     return salida
 
 
-def _hay_duplicado(sesion: Session, datos: ComunicadoEntrada) -> bool:
+def _hay_duplicado(
+    sesion: Session, datos: ComunicadoEntrada, excepto_id: int | None = None
+) -> bool:
     # shortcut: sin índice único, dos envíos exactamente simultáneos podrían colarse;
     # impedirlo del todo exige una migración (perfil Datos/QA).
     destino = (
@@ -136,6 +138,7 @@ def _hay_duplicado(sesion: Session, datos: ComunicadoEntrada) -> bool:
                 Comunicado.titulo == datos.titulo,
                 Comunicado.contenido == datos.contenido,
                 Comunicado.vigente_hasta >= hoy_en_merida(),
+                Comunicado.id != excepto_id if excepto_id is not None else True,
                 destino,
             )
             .limit(1)
@@ -182,6 +185,8 @@ def editar(
     if comunicado.vigente_hasta < hoy_en_merida():
         raise HTTPException(status.HTTP_409_CONFLICT, "El comunicado ya venció y no se edita.")
     _validar_publicacion(sesion, usuario, datos)
+    if _hay_duplicado(sesion, datos, comunicado.id):
+        raise HTTPException(status.HTTP_409_CONFLICT, "Ya existe un comunicado igual.")
     for campo, valor in datos.model_dump().items():
         setattr(comunicado, campo, valor)
     return _confirmar(sesion, comunicado)

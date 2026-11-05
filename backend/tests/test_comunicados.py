@@ -453,3 +453,24 @@ def test_un_comunicado_vencido_no_cuenta_como_duplicado(cliente, mundo, sesion):
     sesion.get(Comunicado, sesion.query(Comunicado.id).scalar()).contenido = "Será el sábado."
     sesion.flush()
     publicar(cliente, mundo, "presbitero")
+
+
+def test_editar_no_deja_un_comunicado_igual_a_otro(cliente, mundo):
+    publicar(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+    otro = publicar(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id, titulo="Otro aviso")
+    respuesta = cliente.put(
+        f"/comunicados/{otro['id']}",
+        json=cuerpo(mundo["cuarta"].id),
+        headers=cabecera(mundo, "pastor4"),
+    )
+    assert respuesta.status_code == 409
+
+
+def test_guardar_un_comunicado_sin_cambios_no_cuenta_como_duplicado(cliente, mundo):
+    comunicado = publicar(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+    respuesta = cliente.put(
+        f"/comunicados/{comunicado['id']}",
+        json=cuerpo(mundo["cuarta"].id),
+        headers=cabecera(mundo, "pastor4"),
+    )
+    assert respuesta.status_code == 200
