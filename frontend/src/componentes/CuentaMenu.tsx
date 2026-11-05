@@ -19,7 +19,7 @@ export function BotonCerrarSesion({ alCerrar }: { alCerrar?: () => void }) {
       <button
         type="button"
         onClick={() => setConfirmando(true)}
-        className="w-full rounded-xl border border-borde px-3.5 py-2.5 text-left font-semibold text-peligro transition-colors hover:bg-peligro-fondo"
+        className="w-full rounded-xl border border-borde px-3.5 py-2.5 text-center font-semibold text-peligro transition-colors hover:bg-peligro-fondo"
       >
         Cerrar sesión
       </button>
@@ -33,7 +33,7 @@ export function BotonCerrarSesion({ alCerrar }: { alCerrar?: () => void }) {
       onKeyDown={(e) => e.key === 'Escape' && setConfirmando(false)}
       className="rounded-xl border border-peligro/40 bg-peligro-fondo p-3"
     >
-      <p className="text-sm font-semibold text-peligro">¿Cerrar sesión?</p>
+      <p className="text-center text-sm font-semibold text-peligro">¿Cerrar sesión?</p>
       <div className="mt-2 flex gap-2">
         <button
           type="button"
