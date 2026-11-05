@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import type { EntradaMenu } from './tipos'
+import CuentaMenu from './CuentaMenu'
 import { useMenuVisible } from './useMenuVisible'
 
 interface Props {
@@ -97,6 +98,7 @@ export default function Layout({ menu: menuCompleto }: Props) {
             </NavLink>
           ))}
         </nav>
+        <CuentaMenu alNavegar={cerrar} />
       </aside>
 
       <main className="min-w-0 flex-1 px-4 py-6 md:px-10 md:py-10">
