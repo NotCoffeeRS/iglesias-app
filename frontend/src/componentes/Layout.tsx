@@ -14,7 +14,7 @@ function clasesEnlace({ isActive }: { isActive: boolean }) {
     'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[1.0625rem] transition-colors',
     isActive
       ? 'bg-acento font-semibold text-acento-texto'
-      : 'text-texto-suave hover:bg-superficie-2 hover:text-texto',
+      : 'text-texto-suave hover:bg-resalte hover:text-texto',
   ].join(' ')
 }
 
@@ -46,7 +46,7 @@ export default function Layout({ menu: menuCompleto }: Props) {
           onClick={() => setAbierto(true)}
           aria-label="Abrir menú"
           aria-expanded={abierto}
-          className="-ml-2 rounded-xl p-2 text-texto hover:bg-superficie-2"
+          className="-ml-2 rounded-xl p-2 text-texto hover:bg-resalte"
         >
           <svg
             viewBox="0 0 24 24"
@@ -80,7 +80,7 @@ export default function Layout({ menu: menuCompleto }: Props) {
             type="button"
             onClick={cerrar}
             aria-label="Cerrar menú"
-            className="-mr-2 rounded-xl p-2 text-texto-suave hover:bg-superficie-2 md:hidden"
+            className="-mr-2 rounded-xl p-2 text-texto-suave hover:bg-resalte md:hidden"
           >
             <svg
               viewBox="0 0 24 24"
@@ -113,7 +113,7 @@ export default function Layout({ menu: menuCompleto }: Props) {
                   aria-expanded={abierta}
                   aria-controls={`seccion-${clave}`}
                   onClick={() => setAbiertas((a) => ({ ...a, [clave]: !abierta }))}
-                  className="flex w-full items-center justify-between rounded-xl px-3.5 py-2 text-left text-sm font-extrabold tracking-wide text-primario uppercase transition-colors hover:bg-superficie-2"
+                  className="flex w-full items-center justify-between rounded-xl px-3.5 py-2 text-left text-sm font-extrabold tracking-wide text-primario uppercase transition-colors hover:bg-resalte"
                 >
                   {titulo}
                   <Icono
