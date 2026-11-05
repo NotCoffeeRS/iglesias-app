@@ -1,8 +1,12 @@
 import { useMemo, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { ESTADOS, listarMiembros, type EstadoMiembro } from '../../api/miembros'
+import { obtenerYo } from '../../api/usuarios'
 import { Cargando, ErrorConReintento, EtiquetaEstado } from './comunes'
 import { claseBotonPrincipal, claseCampo, normalizar, useCarga } from './utilidades'
+
+// Quienes registran miembros (el servidor lo vuelve a validar).
+const CARGOS_QUE_REGISTRAN = ['presbitero', 'pastor', 'apoyo_pastor']
 
 export default function ListaMiembros() {
   const ubicacion = useLocation()
@@ -18,6 +22,10 @@ export default function ListaMiembros() {
     'cargar los miembros',
     estado,
   )
+
+  const { estado: sesion } = useCarga(obtenerYo, 'conocer tu cargo')
+  const puedeRegistrar =
+    sesion.tipo === 'listo' && CARGOS_QUE_REGISTRAN.includes(sesion.datos.cargo)
 
   const visibles = useMemo(() => {
     if (carga.tipo !== 'listo') return []
@@ -55,9 +63,11 @@ export default function ListaMiembros() {
             </p>
           )}
         </div>
-        <Link to="/miembros/nuevo" className={claseBotonPrincipal}>
-          Registrar miembro
-        </Link>
+        {puedeRegistrar && (
+          <Link to="/miembros/nuevo" className={claseBotonPrincipal}>
+            Registrar miembro
+          </Link>
+        )}
       </div>
 
       {aviso && (
@@ -113,7 +123,10 @@ export default function ListaMiembros() {
       <div className="mt-5">
         {carga.tipo === 'cargando' && <Cargando />}
         {carga.tipo === 'error' && (
-          <ErrorConReintento mensaje={carga.mensaje} reintentar={reintentar} />
+          <ErrorConReintento
+            mensaje={carga.mensaje}
+            reintentar={carga.sinPermiso ? undefined : reintentar}
+          />
         )}
         {carga.tipo === 'listo' && visibles.length === 0 && (
           <p className="rounded-3xl border border-borde bg-superficie p-6 text-texto-suave">
@@ -121,7 +134,9 @@ export default function ListaMiembros() {
               ? `Nadie coincide con “${busqueda.trim()}”. Revisa cómo se escribe el nombre.`
               : estado
                 ? 'No hay miembros con este estado.'
-                : 'Todavía no hay miembros registrados. Registra el primero.'}
+                : puedeRegistrar
+                  ? 'Todavía no hay miembros registrados. Registra el primero.'
+                  : 'No hay miembros en tu área.'}
           </p>
         )}
         {carga.tipo === 'listo' && visibles.length > 0 && (
