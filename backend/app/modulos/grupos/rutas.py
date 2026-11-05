@@ -17,8 +17,8 @@ from app.modulos.grupos.servicio import (
     crear_grupo,
     listar_grupos,
     obtener_grupo,
+    obtener_usuario_actual,
 )
-from app.seguridad.permisos import obtener_usuario_actual
 
 ETIQUETAS = {
     "nombre": "el nombre",

@@ -10,13 +10,42 @@ Un líder "solo administra su grupo" (criterio del #20): puede cambiar el nombre
 SU grupo, pero no su líder, su tipo ni su iglesia.
 """
 
-from fastapi import HTTPException
+from typing import Annotated
+
+from fastapi import Depends, HTTPException
 from sqlalchemy import Select, false, select
 from sqlalchemy.orm import Session
 
+from app.db import get_db
 from app.modelos import Grupo, GrupoMiembro, Iglesia, Miembro, Usuario
 from app.modulos.grupos.schemas import GrupoEntrada, GrupoRespuesta, GrupoResumen
-from app.seguridad.permisos import denegar
+from app.seguridad.tokens import obtener_usuario_id
+
+
+# shortcut: copia de `denegar` y `obtener_usuario_actual` del PR #56 (app/seguridad/permisos.py)
+# para que este módulo no dependa de él. Cuando el #56 esté en main, importar de allí y borrar
+# estas dos funciones.
+def denegar() -> None:
+    raise HTTPException(status_code=403, detail="No tienes permiso para realizar esta acción.")
+
+
+def obtener_usuario_actual(
+    sujeto: Annotated[str, Depends(obtener_usuario_id)],
+    sesion: Annotated[Session, Depends(get_db)],
+) -> Usuario:
+    try:
+        identificador = int(sujeto)
+    except ValueError:
+        identificador = 0
+    usuario = sesion.get(Usuario, identificador) if identificador > 0 else None
+    if usuario is None or not usuario.activo:
+        raise HTTPException(
+            status_code=401,
+            detail="Sesión no válida o vencida",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return usuario
+
 
 GESTORES = {"presbitero", "pastor", "apoyo_pastor"}
 
