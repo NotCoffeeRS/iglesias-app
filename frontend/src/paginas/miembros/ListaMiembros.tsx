@@ -48,7 +48,7 @@ export default function ListaMiembros() {
       'block rounded-full px-3.5 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors',
       activo
         ? 'bg-primario text-sobre-primario'
-        : 'border border-borde bg-superficie text-texto hover:bg-superficie-2',
+        : 'border border-borde bg-superficie text-texto hover:bg-resalte',
     ].join(' ')
 
   return (
@@ -145,7 +145,7 @@ export default function ListaMiembros() {
               <li key={m.id}>
                 <Link
                   to={`/miembros/${m.id}/editar`}
-                  className="block px-4 py-3.5 transition-colors hover:bg-superficie-2"
+                  className="block px-4 py-3.5 transition-colors hover:bg-resalte"
                 >
                   <span className="block truncate font-semibold">{m.nombre}</span>
                   <span className="mt-1 flex items-center gap-2 text-sm text-texto-suave">

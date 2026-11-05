@@ -60,7 +60,7 @@ export const claseBotonPrincipal =
   'inline-flex items-center justify-center rounded-xl bg-primario px-5 py-2.5 font-semibold text-sobre-primario transition-colors hover:bg-primario-hover disabled:cursor-not-allowed disabled:opacity-50'
 
 export const claseBotonSecundario =
-  'inline-flex items-center justify-center rounded-xl border border-borde bg-superficie px-5 py-2.5 font-semibold text-texto transition-colors hover:bg-superficie-2'
+  'inline-flex items-center justify-center rounded-xl border border-borde bg-superficie px-5 py-2.5 font-semibold text-texto transition-colors hover:bg-resalte'
 
 export const claseCampo =
   'mt-1.5 block w-full rounded-xl border border-borde bg-superficie-2 px-3.5 py-3 text-base text-texto ' +

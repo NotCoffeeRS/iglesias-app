@@ -75,7 +75,7 @@ export default function HorariosPublicos() {
           </span>
           <Link
             to="/login"
-            className="rounded-xl px-3 py-2 text-sm font-semibold text-enlace hover:bg-superficie-2"
+            className="rounded-xl px-3 py-2 text-sm font-semibold text-enlace hover:bg-resalte"
           >
             Iniciar sesión
           </Link>

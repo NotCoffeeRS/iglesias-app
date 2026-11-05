@@ -33,7 +33,7 @@ function Fila({ u, editable }: { u: UsuarioResumen; editable: boolean }) {
   return editable ? (
     <Link
       to={`/usuarios/${u.id}/editar`}
-      className="block px-4 py-3.5 transition-colors hover:bg-superficie-2"
+      className="block px-4 py-3.5 transition-colors hover:bg-resalte"
     >
       {contenido}
     </Link>
