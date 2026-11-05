@@ -42,6 +42,7 @@ function Panel({
       iglesia_id: iglesia ? Number(iglesia) : undefined,
       servicio: servicio || undefined,
     })
+    reintentar()
   }
   return (
     <div className="space-y-5">
