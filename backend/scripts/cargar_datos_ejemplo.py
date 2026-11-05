@@ -38,14 +38,15 @@ import os
 import sys
 from collections import defaultdict
 from collections.abc import Callable, Mapping, Sequence
-from datetime import date
+from datetime import UTC, date, datetime
+from decimal import Decimal
 
 from sqlalchemy import func, inspect, select
 from sqlalchemy.engine import URL, create_engine, make_url
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
-from app.modelos import Grupo, GrupoMiembro, Iglesia, Miembro, Sede, Usuario
+from app.modelos import Gasto, Grupo, GrupoMiembro, Iglesia, Ingreso, Miembro, Sede, Usuario
 from app.modelos.utilidades import obtener_url_base_datos
 from app.seguridad.contrasenas import crear_hash
 
@@ -324,6 +325,72 @@ INTEGRANTES = {
 }
 
 
+# Ingresos ficticios: (número, iglesia, fecha, tipo, monto, texto extra).
+# Los ingresos NO guardan quién dio (decisión D17): solo cantidades por culto y tipo.
+# Las fechas son fijas (domingos de octubre y noviembre de 2026) para que el script dé siempre
+# lo mismo y para que el filtro "mes pasado" de la demo tenga datos. El texto extra solo es
+# obligatorio en el tipo "otras" (la base lo exige).
+_3RA = "3ra IAFCJ de Mérida"
+_4TA = "4ta IAFCJ de Mérida"
+_6TA = "6ta IAFCJ de Mérida"
+_HUHI = "IAFCJ de Huhí"
+INGRESOS = (
+    (1, _3RA, "2026-10-04", "diezmos", "4850.00", None),
+    (2, _3RA, "2026-10-04", "ofrendas", "2310.50", None),
+    (3, _3RA, "2026-10-04", "evami", "640.00", None),
+    (4, _3RA, "2026-10-04", "talento", "1200.00", None),
+    (5, _3RA, "2026-10-04", "otras", "500.00", "Donación para el aire acondicionado"),
+    (6, _3RA, "2026-10-11", "diezmos", "4120.00", None),
+    (7, _3RA, "2026-10-11", "ofrendas", "1985.00", None),
+    (8, _3RA, "2026-10-18", "diezmos", "5230.75", None),
+    (9, _3RA, "2026-10-18", "ofrendas", "2455.25", None),
+    (10, _3RA, "2026-10-18", "evami", "580.00", None),
+    (11, _3RA, "2026-10-25", "diezmos", "4675.00", None),
+    (12, _3RA, "2026-10-25", "ofrendas", "2100.00", None),
+    (13, _3RA, "2026-10-25", "talento", "950.00", None),
+    (14, _3RA, "2026-11-01", "diezmos", "4990.00", None),
+    (15, _3RA, "2026-11-01", "ofrendas", "2260.00", None),
+    (16, _3RA, "2026-11-01", "evami", "700.00", None),
+    (17, _3RA, "2026-11-01", "talento", "1100.00", None),
+    (18, _3RA, "2026-11-01", "otras", "350.00", "Venta de comida del primer domingo"),
+    (19, _4TA, "2026-10-18", "diezmos", "1800.00", None),
+    (20, _4TA, "2026-10-18", "ofrendas", "860.00", None),
+    (21, _4TA, "2026-11-01", "diezmos", "1950.00", None),
+    (22, _4TA, "2026-11-01", "ofrendas", "910.50", None),
+    (23, _6TA, "2026-10-25", "diezmos", "2100.00", None),
+    (24, _6TA, "2026-10-25", "ofrendas", "1020.00", None),
+    (25, _6TA, "2026-11-01", "ofrendas", "1075.00", None),
+    (26, _HUHI, "2026-10-25", "diezmos", "900.00", None),
+    (27, _HUHI, "2026-10-25", "ofrendas", "480.00", None),
+)
+
+# Gastos ficticios: (número, iglesia, fecha, categoría, monto, nota).
+GASTOS = (
+    (1, _3RA, "2026-10-05", "luz", "1480.30", "Recibo de luz de septiembre"),
+    (2, _3RA, "2026-10-06", "agua", "320.00", "Recibo de agua"),
+    (3, _3RA, "2026-10-10", "renta", "6500.00", "Renta de la sede de Kanasín, octubre"),
+    (4, _3RA, "2026-10-15", "mantenimiento", "2150.00", "Reparación del sonido"),
+    (5, _3RA, "2026-10-20", "otros", "450.00", "Compra de papelería"),
+    (6, _3RA, "2026-10-30", "apoyo_miembros", "1200.00", "Apoyo a un hermano (ejemplo)"),
+    (7, _3RA, "2026-11-01", "materiales_reposiciones", "780.00", "Bocinas y cables"),
+    (8, _4TA, "2026-10-12", "luz", "910.00", "Recibo de luz"),
+    (9, _4TA, "2026-10-26", "agua", "205.00", "Recibo de agua"),
+    (10, _6TA, "2026-10-14", "renta", "3000.00", "Renta del local, octubre"),
+    (11, _6TA, "2026-10-28", "luz", "760.40", "Recibo de luz"),
+    (12, _HUHI, "2026-10-20", "mantenimiento", "1100.00", "Pintura del frente"),
+)
+
+# Un gasto de ejemplo ya anulado (para ver cómo se muestra): número del gasto -> motivo.
+# Nada se borra: se anula con motivo, fecha y quién lo hizo (la base lo exige).
+GASTOS_ANULADOS = {5: "Se capturó dos veces por error"}
+FECHA_ANULACION = datetime(2026, 10, 21, 15, 30, tzinfo=UTC)
+
+# Cada ingreso y gasto lleva al inicio una etiqueta fija, por ejemplo "[ejemplo-ING-03]".
+# No tienen clave natural, así que la etiqueta es lo que permite reconocerlos al repetir.
+ETIQUETA_INGRESO = "[ejemplo-ING-{:02d}]"
+ETIQUETA_GASTO = "[ejemplo-GAS-{:02d}]"
+
+
 class ErrorDatosEjemplo(Exception):
     """Un problema que se explica al usuario en español (sin trazas ni datos sensibles)."""
 
@@ -579,6 +646,71 @@ def _cargar_grupos(
             )
 
 
+def _cargar_dinero(
+    sesion: Session,
+    resumen: dict[str, dict[str, int]],
+    iglesias: Mapping[str, Iglesia],
+    cuentas: Mapping[str, Usuario],
+) -> None:
+    """Crea los ingresos y gastos ficticios.
+
+    Los de la 3ra de Mérida los registra la cuenta del tesorero. Para las otras iglesias se
+    usa la cuenta del presbítero (solo hay una cuenta por cargo y el presbítero ve todo).
+    """
+
+    def quien_registra(nombre_iglesia: str) -> Usuario:
+        return cuentas["tesorero"] if nombre_iglesia == IGLESIA_DEMO else cuentas["presbitero"]
+
+    for numero, nombre_iglesia, fecha, tipo, monto, extra in INGRESOS:
+        etiqueta = ETIQUETA_INGRESO.format(numero)
+        _obtener_o_crear(
+            sesion,
+            resumen,
+            "ingresos",
+            # Se reconoce por la etiqueta (autoescape: sus corchetes se toman literales).
+            sesion.scalar(
+                select(Ingreso).where(Ingreso.descripcion.startswith(etiqueta, autoescape=True))
+            ),
+            lambda: Ingreso(
+                iglesia_id=iglesias[nombre_iglesia].id,
+                fecha=date.fromisoformat(fecha),
+                tipo_servicio="culto_domingo",
+                tipo=tipo,
+                monto=Decimal(monto),
+                descripcion=f"{etiqueta} {extra}" if extra else etiqueta,
+                registrado_por=quien_registra(nombre_iglesia).id,
+            ),
+        )
+
+    for numero, nombre_iglesia, fecha, categoria, monto, nota in GASTOS:
+        etiqueta = ETIQUETA_GASTO.format(numero)
+        motivo = GASTOS_ANULADOS.get(numero)
+
+        def nuevo_gasto() -> Gasto:
+            gasto = Gasto(
+                iglesia_id=iglesias[nombre_iglesia].id,
+                fecha=date.fromisoformat(fecha),
+                categoria=categoria,
+                monto=Decimal(monto),
+                nota=f"{etiqueta} {nota}",
+                registrado_por=quien_registra(nombre_iglesia).id,
+            )
+            if motivo:
+                # La anulación va completa o no va: fecha, motivo y quién (regla de la base).
+                gasto.anulado_en = FECHA_ANULACION
+                gasto.anulado_motivo = motivo
+                gasto.anulado_por = cuentas["tesorero"].id
+            return gasto
+
+        _obtener_o_crear(
+            sesion,
+            resumen,
+            "gastos",
+            sesion.scalar(select(Gasto).where(Gasto.nota.startswith(etiqueta, autoescape=True))),
+            nuevo_gasto,
+        )
+
+
 def cargar_datos(sesion: Session, claves: Mapping[str, str]) -> dict[str, dict[str, int]]:
     """Carga todos los datos de ejemplo con la sesión dada y devuelve el resumen.
 
@@ -590,9 +722,11 @@ def cargar_datos(sesion: Session, claves: Mapping[str, str]) -> dict[str, dict[s
     iglesias = _cargar_iglesias_y_sedes(sesion, resumen)
     miembros = _cargar_miembros(sesion, resumen, iglesias)
     # Las cuentas van después de los miembros: la del líder de célula apunta a su ficha.
-    _cargar_cuentas(sesion, resumen, iglesias, miembros, claves)
-    # Los grupos van al final: su líder y su asistente son miembros.
+    cuentas = _cargar_cuentas(sesion, resumen, iglesias, miembros, claves)
+    # Los grupos: su líder y su asistente son miembros, así que van después de ellos.
     _cargar_grupos(sesion, resumen, iglesias, miembros)
+    # El dinero va al final: cada ingreso y gasto apunta a la cuenta que lo registró.
+    _cargar_dinero(sesion, resumen, iglesias, cuentas)
     return resumen
 
 
