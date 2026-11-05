@@ -178,7 +178,7 @@ El criterio del Issue pide reportar los fallos como Issues `bug`.
 
 | Fallo | Dónde | Estado |
 |---|---|---|
-| El texto **"Comunicados"** se sale de su tarjeta en la pantalla de Inicio | Inicio (detalle visual) | Jessica se lo pasó a Marcos y él a Vanessa. **No hay todavía un Issue `bug` abierto** por esto |
+| El texto **"Comunicados"** se sale de su tarjeta en la pantalla de Inicio | Inicio (detalle visual), visto con el ujier y con el líder de célula | Jessica se lo pasó a Marcos y él a Vanessa. **No hay todavía un Issue `bug` abierto** por esto |
 
 Issues `bug` ya registrados y **cerrados** al escribir esto: #82, #83, #84 y #85.
 
