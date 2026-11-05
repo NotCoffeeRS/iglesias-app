@@ -66,7 +66,7 @@ export default function CuentaMenu({ alNavegar }: { alNavegar?: () => void }) {
       <Link
         to="/perfil"
         onClick={alNavegar}
-        className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-superficie-2"
+        className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-resalte"
       >
         <span
           aria-hidden="true"

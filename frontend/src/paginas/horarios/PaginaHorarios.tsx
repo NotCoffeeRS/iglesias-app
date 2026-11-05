@@ -42,7 +42,7 @@ function ErrorConReintento({ mensaje, reintentar }: { mensaje: string; reintenta
 }
 
 const claseBotonFila =
-  'rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors hover:bg-superficie-2'
+  'rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors hover:bg-resalte'
 
 function HorariosDeSede({ sede }: { sede: SedeResumen }) {
   const { estado, recargar } = useCarga(

@@ -13,6 +13,8 @@ export const menu: ModuloRutas['menu'] = [
     ruta: '/comunicados',
     etiqueta: 'Comunicados',
     orden: 75,
+    seccion: 'iglesia',
+    icono: 'comunicados',
     descripcion: 'Avisos y anuncios',
   },
 ]

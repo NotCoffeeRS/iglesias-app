@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
-import type { EntradaMenu } from './tipos'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import CuentaMenu from './CuentaMenu'
+import Icono from './Icono'
+import { SECCIONES_MENU, type EntradaMenu } from './tipos'
 import { useMenuVisible } from './useMenuVisible'
 
 interface Props {
@@ -10,7 +11,7 @@ interface Props {
 
 function clasesEnlace({ isActive }: { isActive: boolean }) {
   return [
-    'block rounded-xl px-3.5 py-2.5 text-[1.0625rem] transition-colors',
+    'flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[1.0625rem] transition-colors',
     isActive
       ? 'bg-acento font-semibold text-acento-texto'
       : 'text-texto-suave hover:bg-superficie-2 hover:text-texto',
@@ -20,7 +21,7 @@ function clasesEnlace({ isActive }: { isActive: boolean }) {
 function Marca() {
   return (
     <Link to="/" className="block leading-tight">
-      <span className="font-titulo text-xl font-bold tracking-tight text-primario">Iglesias</span>
+      <span className="font-titulo text-xl font-bold tracking-tight text-primario">Tessia</span>
       <span className="block text-sm text-texto-suave">Presbiterio de la 3ra IAFCJ</span>
     </Link>
   )
@@ -29,6 +30,10 @@ function Marca() {
 /** Estructura común: encabezado, menú (cajón en celular, barra lateral en computadora) y contenido. */
 export default function Layout({ menu: menuCompleto }: Props) {
   const menu = useMenuVisible(menuCompleto)
+  const ubicacion = useLocation()
+  // Las secciones se pueden plegar. Mientras la persona no toque una, se abre sola la que
+  // contiene la pantalla donde está.
+  const [abiertas, setAbiertas] = useState<Record<string, boolean>>({})
   const [abierto, setAbierto] = useState(false)
   const cerrar = () => setAbierto(false)
 
@@ -90,13 +95,63 @@ export default function Layout({ menu: menuCompleto }: Props) {
         </div>
         <nav aria-label="Menú principal" className="flex flex-col gap-1 px-3 pb-6">
           <NavLink to="/" end className={clasesEnlace} onClick={cerrar}>
+            <Icono nombre="inicio" />
             Inicio
           </NavLink>
-          {menu.map((entrada) => (
-            <NavLink key={entrada.ruta} to={entrada.ruta} className={clasesEnlace} onClick={cerrar}>
-              {entrada.etiqueta}
-            </NavLink>
-          ))}
+          {SECCIONES_MENU.map(({ clave, titulo }) => {
+            const entradas = menu.filter((e) => e.seccion === clave)
+            if (entradas.length === 0) return null
+            const abierta =
+              abiertas[clave] ??
+              entradas.some(
+                (e) => ubicacion.pathname === e.ruta || ubicacion.pathname.startsWith(e.ruta + '/'),
+              )
+            return (
+              <div key={clave} className="mt-2 border-t border-borde pt-2">
+                <button
+                  type="button"
+                  aria-expanded={abierta}
+                  aria-controls={`seccion-${clave}`}
+                  onClick={() => setAbiertas((a) => ({ ...a, [clave]: !abierta }))}
+                  className="flex w-full items-center justify-between rounded-xl px-3.5 py-2 text-left text-sm font-extrabold tracking-wide text-primario uppercase transition-colors hover:bg-superficie-2"
+                >
+                  {titulo}
+                  <Icono
+                    nombre="flecha"
+                    className={'h-4 w-4 transition-transform ' + (abierta ? 'rotate-180' : '')}
+                  />
+                </button>
+                {abierta && (
+                  <div id={`seccion-${clave}`} className="mt-1 flex flex-col gap-1">
+                    {entradas.map((entrada) => (
+                      <NavLink
+                        key={entrada.ruta}
+                        to={entrada.ruta}
+                        className={clasesEnlace}
+                        onClick={cerrar}
+                      >
+                        {entrada.icono && <Icono nombre={entrada.icono} />}
+                        {entrada.etiqueta}
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+          {menu
+            .filter((e) => !e.seccion)
+            .map((entrada) => (
+              <NavLink
+                key={entrada.ruta}
+                to={entrada.ruta}
+                className={clasesEnlace}
+                onClick={cerrar}
+              >
+                {entrada.icono && <Icono nombre={entrada.icono} />}
+                {entrada.etiqueta}
+              </NavLink>
+            ))}
         </nav>
         <CuentaMenu alNavegar={cerrar} />
       </aside>

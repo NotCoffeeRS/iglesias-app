@@ -1,6 +1,17 @@
 import type { ComponentType, ReactNode } from 'react'
 import type { RouteObject } from 'react-router-dom'
 import type { Cargo } from '../api/usuarios'
+import type { NombreIcono } from './iconos'
+
+/** Secciones del menú: agrupan las pantallas para que la lista no sea larga y confusa. */
+export type SeccionMenu = 'iglesia' | 'personas' | 'dinero'
+
+/** Orden y título de cada sección del menú y del Inicio. */
+export const SECCIONES_MENU: { clave: SeccionMenu; titulo: string }[] = [
+  { clave: 'iglesia', titulo: 'Iglesia' },
+  { clave: 'personas', titulo: 'Personas' },
+  { clave: 'dinero', titulo: 'Dinero' },
+]
 
 /** Un enlace del menú principal. */
 export interface EntradaMenu {
@@ -14,6 +25,10 @@ export interface EntradaMenu {
   descripcion?: string
   /** Cargos que ven esta entrada. Sin lista, la ven todos (el servidor valida el acceso de todos modos). */
   cargos?: readonly Cargo[]
+  /** Sección del menú donde aparece (con título). Sin sección, va al final sin título. */
+  seccion?: SeccionMenu
+  /** Ícono de línea que acompaña a la entrada en el menú. */
+  icono?: NombreIcono
 }
 
 /**

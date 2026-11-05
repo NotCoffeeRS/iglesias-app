@@ -13,6 +13,8 @@ export const menu: ModuloRutas['menu'] = [
     ruta: '/gastos',
     etiqueta: 'Gastos',
     orden: 45,
+    seccion: 'dinero',
+    icono: 'gastos',
     cargos: CARGOS_CON_DINERO,
     descripcion: 'Luz, agua, renta y más',
   },
