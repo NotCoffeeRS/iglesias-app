@@ -128,3 +128,9 @@ No se piden ni se anotan datos reales de personas: para las pruebas usamos nombr
 - **Imagen:** logo de la IAFCJ. No hay internet estable en todas las iglesias.
 - No entendió la pregunta de las palabras propias de la app (35); no pidió dato de envío a la 3ra o fondo (21), que prefirió no preguntar.
 
+### 5 nov 2026 — horarios de la 4ta y de Huhí
+
+- **Huhí:** miércoles y sábados a las 6:00 pm; domingos a las 5:00 pm.
+- **4ta de Mérida:** cultos los domingos a las 5:00 pm.
+- Sigue pendiente el **día** de la 6ta (solo dijo 6 pm; ya había dicho que también tiene culto los miércoles).
+

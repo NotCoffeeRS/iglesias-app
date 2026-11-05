@@ -65,7 +65,7 @@ Cuentas que se crean (el usuario es público; **las contraseñas las sabes solo 
 | Líder de célula | `lider.celula.ejemplo` |
 | Ujier | `ujier.ejemplo` |
 
-El script es repetible (no duplica) y solo corre contra una base de **esta misma computadora**. Carga 4 iglesias, 22 miembros, 6 grupos, 6 cuentas, 27 ingresos y 12 gastos de ejemplo. **No carga** direcciones, enlaces de Google Maps, horarios, redes ni teléfonos (aún no los tenemos y no se inventan), **ni eventos ni comunicados**: salen vacíos. Horarios que ya conocemos (sin cargar todavía): 3ra Madero, domingos 17:30; 3ra Kanasín, domingos 11:30; 6ta, 18:00. La 4ta y Huhí: no se conocen.
+El script es repetible (no duplica) y solo corre contra una base de **esta misma computadora**. Carga 4 iglesias, 22 miembros, 6 grupos, 6 cuentas, 27 ingresos y 12 gastos de ejemplo. **No carga** direcciones, enlaces de Google Maps, horarios, redes ni teléfonos (aún no los tenemos y no se inventan), **ni eventos ni comunicados**: salen vacíos. Horarios que ya conocemos (**sin cargar todavía**; se capturan en la pantalla de Horarios): 3ra Madero, domingos 17:30; 3ra Kanasín, domingos 11:30; 4ta, domingos 17:00; Huhí, miércoles y sábados 18:00 y domingos 17:00; 6ta, 18:00 (falta el día).
 
 ### Qué esperar en pantalla (5 nov)
 
