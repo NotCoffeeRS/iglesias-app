@@ -7,6 +7,9 @@
 //   POST /usuarios          ← UsuarioNuevo → Usuario
 //   PUT  /usuarios/{id}     ← UsuarioCambios → Usuario
 //   GET  /iglesias          → [{ id, nombre }]  (#12)
+//   GET  /miembros?iglesia_id=N → [{ id, nombre, ... }]  (#17; para elegir la ficha de miembro)
+// `miembro_id` liga la cuenta con la ficha de un miembro (D21): de ella sale el área del usuario.
+// Es opcional; null = sin ficha. Un miembro tiene a lo sumo una cuenta (el servidor da 409).
 // Los usuarios no se borran: se desactivan (`activo`). La contraseña solo viaja al crear la cuenta.
 // El servidor valida todo (D19, D20); la pantalla solo oculta lo que el cargo no puede usar.
 // Si el contrato cambia, solo se ajusta este archivo.
@@ -54,6 +57,8 @@ export interface Usuario {
   cargo: Cargo
   iglesia_id: number | null
   activo: boolean
+  /** Ficha de miembro ligada a la cuenta (D21); null = sin ficha. */
+  miembro_id?: number | null
 }
 
 export interface UsuarioNuevo {
@@ -62,6 +67,8 @@ export interface UsuarioNuevo {
   cargo: Cargo
   iglesia_id: number
   contrasena: string
+  /** null = sin ficha de miembro. */
+  miembro_id: number | null
 }
 
 export interface UsuarioCambios {
@@ -69,6 +76,13 @@ export interface UsuarioCambios {
   cargo: Cargo
   iglesia_id: number | null
   activo: boolean
+  /** null = sin ficha de miembro (siempre se envía: un PUT reemplaza todo). */
+  miembro_id: number | null
+}
+
+export interface MiembroOpcion {
+  id: number
+  nombre: string
 }
 
 export interface IglesiaOpcion {
@@ -98,6 +112,11 @@ export function actualizarUsuario(id: number, datos: UsuarioCambios): Promise<Us
 
 export function listarIglesiasParaUsuarios(): Promise<IglesiaOpcion[]> {
   return api.get<IglesiaOpcion[]>('/iglesias')
+}
+
+/** Miembros de una iglesia, para elegir la ficha de la cuenta. */
+export function listarMiembrosParaUsuarios(iglesiaId: number): Promise<MiembroOpcion[]> {
+  return api.get<MiembroOpcion[]>(`/miembros?iglesia_id=${iglesiaId}`)
 }
 
 /** Lista cerrada de cargos (AGENTS.md §9 y modelo de usuarios del #4). */
