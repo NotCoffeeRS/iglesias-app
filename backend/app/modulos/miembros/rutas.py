@@ -22,8 +22,8 @@ from app.modulos.miembros.servicio import (
     consultar,
     crear_miembro,
     obtener_miembro,
+    obtener_usuario_actual,
 )
-from app.seguridad.permisos import obtener_usuario_actual
 
 ETIQUETAS = {
     "nombre": "el nombre",
