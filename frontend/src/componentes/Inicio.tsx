@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import LogoIafcj from './LogoIafcj'
 import { SECCIONES_MENU, type EntradaMenu } from './tipos'
 import { useMenuVisible } from './useMenuVisible'
 
@@ -88,6 +89,11 @@ export default function Inicio({ menu }: { menu: EntradaMenu[] }) {
           })}
         </>
       )}
+
+      <footer className="mt-12 flex flex-col items-center gap-2 border-t border-borde pt-6 text-center">
+        <LogoIafcj className="h-20 w-auto" />
+        <p className="text-sm text-texto-suave">Presbiterio de la 3ra IAFCJ</p>
+      </footer>
     </section>
   )
 }
