@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.modelos import Iglesia, Usuario
+from app.modelos import Iglesia, Miembro, Usuario
 from app.modulos.usuarios.schemas import (
     UsuarioCambios,
     UsuarioNuevo,
@@ -59,6 +59,33 @@ def validar_iglesia(sesion: Session, cargo: str, iglesia_id: int | None) -> None
         raise HTTPException(status_code=422, detail="La iglesia indicada no existe.")
 
 
+def validar_miembro(
+    sesion: Session,
+    actor: Usuario,
+    iglesia_id: int | None,
+    miembro_id: int | None,
+    objetivo: Usuario | None = None,
+) -> None:
+    if miembro_id is None:
+        return
+    miembro = sesion.get(Miembro, miembro_id)
+    if miembro is None:
+        raise HTTPException(status_code=422, detail="La ficha de miembro indicada no existe.")
+    if actor.cargo != "presbitero" and miembro.iglesia_id != actor.iglesia_id:
+        denegar()
+    if iglesia_id is not None and miembro.iglesia_id != iglesia_id:
+        raise HTTPException(
+            status_code=422, detail="La ficha debe pertenecer a la iglesia de la cuenta."
+        )
+    consulta = select(Usuario.id).where(Usuario.miembro_id == miembro_id)
+    if objetivo is not None:
+        consulta = consulta.where(Usuario.id != objetivo.id)
+    if sesion.scalar(consulta) is not None:
+        raise HTTPException(
+            status_code=409, detail="La ficha de miembro ya está vinculada a una cuenta."
+        )
+
+
 def obtener_cuenta(sesion: Session, actor: Usuario, identificador: int) -> Usuario:
     if actor.cargo not in GESTORES:
         denegar()
@@ -88,8 +115,13 @@ def listar_cuentas(sesion: Session, actor: Usuario) -> list[UsuarioResumen]:
 def guardar(sesion: Session, cuenta: Usuario) -> Usuario:
     try:
         sesion.commit()
-    except IntegrityError:
+    except IntegrityError as error:
+        restriccion = getattr(getattr(error.orig, "diag", None), "constraint_name", None)
         sesion.rollback()
+        if restriccion == "uq_usuarios_miembro_id":
+            raise HTTPException(
+                status_code=409, detail="La ficha de miembro ya está vinculada a una cuenta."
+            ) from None
         raise HTTPException(status_code=409, detail="Ese nombre de usuario ya existe.") from None
     sesion.refresh(cuenta)
     return cuenta
@@ -98,12 +130,14 @@ def guardar(sesion: Session, cuenta: Usuario) -> Usuario:
 def crear_cuenta(sesion: Session, actor: Usuario, datos: UsuarioNuevo) -> Usuario:
     validar_asignacion(actor, datos.cargo, datos.iglesia_id)
     validar_iglesia(sesion, datos.cargo, datos.iglesia_id)
+    validar_miembro(sesion, actor, datos.iglesia_id, datos.miembro_id)
     cuenta = Usuario(
         nombre_usuario=datos.nombre_usuario,
         nombre_completo=datos.nombre_completo,
         contrasena_hash=crear_hash(datos.contrasena.get_secret_value()),
         cargo=datos.cargo,
         iglesia_id=datos.iglesia_id,
+        miembro_id=datos.miembro_id,
         activo=True,
     )
     sesion.add(cuenta)
@@ -116,8 +150,11 @@ def actualizar_cuenta(
     cuenta = obtener_cuenta(sesion, actor, identificador)
     validar_asignacion(actor, datos.cargo, datos.iglesia_id, cuenta)
     validar_iglesia(sesion, datos.cargo, datos.iglesia_id)
+    miembro_id = datos.miembro_id if "miembro_id" in datos.model_fields_set else cuenta.miembro_id
+    validar_miembro(sesion, actor, datos.iglesia_id, miembro_id, cuenta)
     cuenta.nombre_completo = datos.nombre_completo
     cuenta.cargo = datos.cargo
     cuenta.iglesia_id = datos.iglesia_id
     cuenta.activo = datos.activo
+    cuenta.miembro_id = miembro_id
     return guardar(sesion, cuenta)

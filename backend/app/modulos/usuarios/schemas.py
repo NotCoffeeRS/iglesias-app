@@ -1,4 +1,4 @@
-"""Contrato de cuentas del frontend; el vínculo de área sigue pendiente de Marcos."""
+"""Contrato de cuentas con vínculo opcional de miembro (D21)."""
 
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 
@@ -10,6 +10,7 @@ class DatosCuenta(BaseModel):
     nombre_completo: str = Field(min_length=1, max_length=150)
     cargo: str
     iglesia_id: int | None = Field(default=None, gt=0)
+    miembro_id: int | None = Field(default=None, gt=0)
 
     @field_validator("cargo")
     @classmethod
@@ -36,6 +37,7 @@ class UsuarioRespuesta(BaseModel):
     cargo: str
     iglesia_id: int | None
     activo: bool
+    miembro_id: int | None
 
 
 class UsuarioResumen(UsuarioRespuesta):

@@ -14,7 +14,7 @@ from test_auth import motor_login as motor_login
 
 from app.db import get_db
 from app.main import crear_app
-from app.modelos import CARGOS, Iglesia, Usuario
+from app.modelos import CARGOS, Grupo, Iglesia, Miembro, Usuario
 from app.seguridad.contrasenas import crear_hash, verificar_contrasena
 from app.seguridad.permisos import requerir_cargos, requerir_permiso
 from app.seguridad.tokens import crear_token
@@ -72,6 +72,20 @@ def entorno(motor_login, monkeypatch):
 
             @app.get("/prueba/solo-pastor")
             def solo_pastor(usuario: Annotated[Usuario, Depends(requerir_cargos("pastor"))]):
+                return {"ok": True}
+
+            @app.get("/prueba/area/{area_id}")
+            def area(usuario: Annotated[Usuario, Depends(requerir_permiso())]):
+                return {"ok": True}
+
+            @app.get("/prueba/iglesia/{iglesia_id}/area/{area_id}")
+            def iglesia_area(usuario: Annotated[Usuario, Depends(requerir_permiso())]):
+                return {"ok": True}
+
+            @app.get("/prueba/grupo/{grupo_id}")
+            def grupo(
+                usuario: Annotated[Usuario, Depends(requerir_permiso(parametro_area="grupo_id"))],
+            ):
                 return {"ok": True}
 
             with TestClient(app) as cliente:
@@ -314,7 +328,7 @@ def test_dinero_solo_cargos_permitidos_en_su_iglesia(entorno, cargo):
         assert respuesta.status_code == (200 if permitido else 403)
 
 
-def test_lider_no_recibe_acceso_general_mientras_area_esta_pendiente(entorno):
+def test_lider_no_recibe_acceso_general_a_la_iglesia(entorno):
     cliente, _, cuentas, iglesias, _ = entorno
     respuesta = cliente.get(
         f"/prueba/iglesia/{iglesias[0].id}", headers=autorizacion(cuentas, "lider_celula")
@@ -370,3 +384,208 @@ def test_desactivar_por_api_revoca_la_cuenta_sin_borrarla(entorno):
     assert respuesta.status_code == 200
     assert sesion.get(Usuario, cuenta.id) is not None
     assert cliente.get("/usuarios/yo", headers=headers_lider).status_code == 401
+
+
+@pytest.fixture
+def entorno_areas(entorno):
+    _, sesion, cuentas, iglesias, externo = entorno
+    miembros = [
+        Miembro(
+            nombre=f"Miembro ficticio {i}",
+            iglesia_id=iglesias[1 if i == 2 else 0].id,
+            estado="activo",
+        )
+        for i in range(4)
+    ]
+    sesion.add_all(miembros)
+    sesion.flush()
+    cuentas["lider_celula"].miembro_id = miembros[0].id
+    cuentas["lider_red"].miembro_id = miembros[1].id
+    externo.miembro_id = miembros[2].id
+    grupos = [
+        Grupo(
+            nombre="Célula ficticia",
+            tipo="celula",
+            iglesia_id=iglesias[0].id,
+            lider_miembro_id=miembros[0].id,
+            activo=True,
+        ),
+        Grupo(
+            nombre="Red ficticia",
+            tipo="red",
+            iglesia_id=iglesias[0].id,
+            lider_miembro_id=miembros[1].id,
+            activo=True,
+        ),
+        Grupo(
+            nombre="Otra célula ficticia",
+            tipo="celula",
+            iglesia_id=iglesias[1].id,
+            lider_miembro_id=miembros[2].id,
+            activo=True,
+        ),
+        Grupo(
+            nombre="Área ficticia inactiva",
+            tipo="area",
+            iglesia_id=iglesias[0].id,
+            lider_miembro_id=miembros[0].id,
+            activo=False,
+        ),
+    ]
+    sesion.add_all(grupos)
+    sesion.flush()
+    sesion.commit()
+    return entorno, miembros, grupos
+
+
+def test_alta_acepta_y_devuelve_miembro_id(entorno_areas):
+    base, miembros, _ = entorno_areas
+    cliente, sesion, cuentas, iglesias, _ = base
+    datos = {**datos_alta(iglesias[0].id), "miembro_id": miembros[3].id}
+    respuesta = cliente.post("/usuarios", headers=autorizacion(cuentas, "pastor"), json=datos)
+    assert respuesta.status_code == 201
+    assert respuesta.json()["miembro_id"] == miembros[3].id
+    assert sesion.get(Usuario, respuesta.json()["id"]).miembro_id == miembros[3].id
+
+
+def test_edicion_omitida_conserva_vinculo_y_null_lo_quita(entorno_areas):
+    base, miembros, grupos = entorno_areas
+    cliente, sesion, cuentas, _, _ = base
+    cuenta = cuentas["lider_celula"]
+    headers = autorizacion(cuentas, "pastor")
+    headers_lider = autorizacion(cuentas, "lider_celula")
+    assert cliente.get(f"/prueba/area/{grupos[0].id}", headers=headers_lider).status_code == 200
+    respuesta = cliente.put(f"/usuarios/{cuenta.id}", headers=headers, json=cambios(cuenta))
+    assert respuesta.status_code == 200
+    assert respuesta.json()["miembro_id"] == miembros[0].id
+    respuesta = cliente.put(
+        f"/usuarios/{cuenta.id}", headers=headers, json=cambios(cuenta, miembro_id=None)
+    )
+    assert respuesta.status_code == 200
+    assert respuesta.json()["miembro_id"] is None
+    assert sesion.get(Usuario, cuenta.id).miembro_id is None
+    assert cliente.get(f"/prueba/area/{grupos[0].id}", headers=headers_lider).status_code == 403
+
+
+def test_edicion_vincula_ficha_libre_y_yo_la_devuelve(entorno_areas):
+    base, miembros, _ = entorno_areas
+    cliente, _, cuentas, _, _ = base
+    cuenta = cuentas["asistente"]
+    respuesta = cliente.put(
+        f"/usuarios/{cuenta.id}",
+        headers=autorizacion(cuentas, "pastor"),
+        json=cambios(cuenta, miembro_id=miembros[3].id),
+    )
+    assert respuesta.status_code == 200
+    respuesta = cliente.get("/usuarios/yo", headers=autorizacion(cuentas, "asistente"))
+    assert respuesta.json()["miembro_id"] == miembros[3].id
+
+
+@pytest.mark.parametrize("operacion", ["alta", "edicion"])
+def test_un_miembro_no_puede_tener_dos_cuentas(entorno_areas, operacion):
+    base, miembros, _ = entorno_areas
+    cliente, _, cuentas, iglesias, _ = base
+    headers = autorizacion(cuentas, "pastor")
+    if operacion == "alta":
+        respuesta = cliente.post(
+            "/usuarios",
+            headers=headers,
+            json={**datos_alta(iglesias[0].id), "miembro_id": miembros[0].id},
+        )
+    else:
+        cuenta = cuentas["asistente"]
+        respuesta = cliente.put(
+            f"/usuarios/{cuenta.id}",
+            headers=headers,
+            json=cambios(cuenta, miembro_id=miembros[0].id),
+        )
+    assert respuesta.status_code == 409
+    assert respuesta.json()["detail"] == "La ficha de miembro ya está vinculada a una cuenta."
+
+
+@pytest.mark.parametrize("actor", ["pastor", "apoyo_pastor", "presbitero"])
+def test_no_vincula_ficha_de_otra_iglesia_a_una_cuenta_local(entorno_areas, actor):
+    base, miembros, _ = entorno_areas
+    cliente, _, cuentas, iglesias, _ = base
+    respuesta = cliente.post(
+        "/usuarios",
+        headers=autorizacion(cuentas, actor),
+        json={**datos_alta(iglesias[0].id), "miembro_id": miembros[2].id},
+    )
+    assert respuesta.status_code == (422 if actor == "presbitero" else 403)
+
+
+def test_ficha_inexistente_da_422(entorno_areas):
+    base, _, _ = entorno_areas
+    cliente, _, cuentas, iglesias, _ = base
+    respuesta = cliente.post(
+        "/usuarios",
+        headers=autorizacion(cuentas, "pastor"),
+        json={**datos_alta(iglesias[0].id), "miembro_id": 1000000000},
+    )
+    assert respuesta.status_code == 422
+
+
+@pytest.mark.parametrize("indice,estado", [(0, 200), (1, 403), (2, 403), (3, 403)])
+def test_lider_solo_accede_a_sus_grupos_activos(entorno_areas, indice, estado):
+    base, _, grupos = entorno_areas
+    cliente, _, cuentas, _, _ = base
+    respuesta = cliente.get(
+        f"/prueba/area/{grupos[indice].id}", headers=autorizacion(cuentas, "lider_celula")
+    )
+    assert respuesta.status_code == estado
+
+
+@pytest.mark.parametrize("cargo", ["pastor", "apoyo_pastor", "presbitero"])
+def test_alcance_administrador_por_iglesia_en_areas(entorno_areas, cargo):
+    base, _, grupos = entorno_areas
+    cliente, _, cuentas, _, _ = base
+    headers = autorizacion(cuentas, cargo)
+    assert cliente.get(f"/prueba/area/{grupos[1].id}", headers=headers).status_code == 200
+    respuesta = cliente.get(f"/prueba/area/{grupos[2].id}", headers=headers)
+    assert respuesta.status_code == (200 if cargo == "presbitero" else 403)
+
+
+def test_iglesia_inventada_no_oculta_el_grupo_de_otra_iglesia(entorno_areas):
+    base, _, grupos = entorno_areas
+    cliente, _, cuentas, iglesias, _ = base
+    respuesta = cliente.get(
+        f"/prueba/iglesia/{iglesias[0].id}/area/{grupos[2].id}",
+        headers=autorizacion(cuentas, "pastor"),
+    )
+    assert respuesta.status_code == 403
+
+
+def test_parametro_de_grupo_es_configurable_y_no_se_confia_en_query_de_iglesia(entorno_areas):
+    base, _, grupos = entorno_areas
+    cliente, _, cuentas, iglesias, _ = base
+    headers = autorizacion(cuentas, "lider_celula")
+    assert cliente.get(f"/prueba/grupo/{grupos[0].id}", headers=headers).status_code == 200
+    respuesta = cliente.get(
+        f"/prueba/iglesia/{iglesias[1].id}?iglesia_id={iglesias[0].id}&area_id={grupos[0].id}",
+        headers=headers,
+    )
+    assert respuesta.status_code == 403
+
+
+def test_cambiar_lider_de_grupo_revoca_acceso_sin_cambiar_token(entorno_areas):
+    base, miembros, grupos = entorno_areas
+    cliente, sesion, cuentas, _, _ = base
+    headers = autorizacion(cuentas, "lider_celula")
+    assert cliente.get(f"/prueba/area/{grupos[0].id}", headers=headers).status_code == 200
+    grupos[0].lider_miembro_id = miembros[1].id
+    sesion.flush()
+    assert cliente.get(f"/prueba/area/{grupos[0].id}", headers=headers).status_code == 403
+
+
+def test_tesorero_no_gana_acceso_a_miembros_por_dirigir_un_grupo(entorno_areas):
+    base, miembros, grupos = entorno_areas
+    cliente, sesion, cuentas, _, _ = base
+    cuentas["lider_celula"].miembro_id = None
+    sesion.flush()
+    cuentas["tesorero"].miembro_id = miembros[0].id
+    sesion.flush()
+    respuesta = cliente.get(
+        f"/prueba/area/{grupos[0].id}", headers=autorizacion(cuentas, "tesorero")
+    )
+    assert respuesta.status_code == 403

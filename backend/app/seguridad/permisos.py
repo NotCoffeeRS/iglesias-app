@@ -1,11 +1,8 @@
-"""Sesión actual y permisos por cargo/iglesia (D19 y D20, Issue #9).
-
-El alcance por área espera la decisión de Marcos. Los cargos de área no obtienen
-acceso general a una iglesia como alternativa: se deniega hasta resolver su vínculo.
-"""
+"""Sesión actual y permisos por cargo, iglesia y grupo dirigido (D19, D20 y D21)."""
 
 from typing import Annotated
 
+from app.modelos.grupos import Grupo
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
@@ -48,45 +45,75 @@ def requerir_cargos(*cargos: str):
 
 
 def validar_alcance(
-    usuario: Usuario, iglesia_id: int | None, *, dinero: bool = False, area_id: int | None = None
+    sesion: Session,
+    usuario: Usuario,
+    iglesia_id: int | None,
+    *,
+    dinero: bool = False,
+    area_id: int | None = None,
 ) -> None:
     """Validar con la iglesia REAL del recurso, cargado antes por el servicio.
 
-    El pastor y el presbítero abarcan su iglesia/todas. El apoyo no ve dinero;
-    el tesorero solo entra en recursos financieros de su iglesia. Los demás cargos
-    requieren el vínculo de área pendiente; area_id por sí solo no otorga acceso.
+    El área es un Grupo consultado en la base. Su iglesia y su líder se comprueban;
+    enviar un area_id o una iglesia_id inventados no concede acceso. Los servicios
+    deben cargar el recurso real y pasar aquí su iglesia y grupo antes de usarlo.
     """
     if dinero and usuario.cargo not in {"presbitero", "pastor", "tesorero"}:
         denegar()
+    grupo = sesion.get(Grupo, area_id) if area_id is not None else None
+    if area_id is not None:
+        if grupo is None or (iglesia_id is not None and grupo.iglesia_id != iglesia_id):
+            denegar()
+        iglesia_id = grupo.iglesia_id
     if usuario.cargo == "presbitero":
         return
     if iglesia_id is None or usuario.iglesia_id != iglesia_id:
         denegar()
     if dinero or usuario.cargo in {"pastor", "apoyo_pastor"}:
         return
-    denegar()
+    if usuario.cargo == "tesorero":
+        denegar()
+    if (
+        grupo is None
+        or not grupo.activo
+        or usuario.miembro_id is None
+        or grupo.lider_miembro_id != usuario.miembro_id
+    ):
+        denegar()
 
 
-def requerir_permiso(*cargos: str, dinero: bool = False):
-    """Para rutas por iglesia_id; el servicio valida además el recurso concreto.
+def requerir_permiso(*cargos: str, dinero: bool = False, parametro_area: str = "area_id"):
+    """Para rutas por iglesia_id y/o area_id (configurable); comprobar también el recurso.
 
     Lee el id de la ruta o de la consulta, pero nunca un cargo enviado por el cliente.
     Si el recurso se obtiene por otro id, usar validar_alcance con su iglesia real.
     """
 
     def dependencia(
-        request: Request, usuario: Annotated[Usuario, Depends(obtener_usuario_actual)]
+        request: Request,
+        usuario: Annotated[Usuario, Depends(obtener_usuario_actual)],
+        sesion: Annotated[Session, Depends(get_db)],
     ) -> Usuario:
         if cargos and usuario.cargo not in cargos:
             denegar()
-        valor = request.path_params.get("iglesia_id", request.query_params.get("iglesia_id"))
-        try:
-            iglesia_id = int(valor)
-        except (TypeError, ValueError):
+
+        def identificador(nombre: str) -> int | None:
+            valor = request.path_params.get(nombre, request.query_params.get(nombre))
+            if valor is None:
+                return None
+            try:
+                numero = int(valor)
+            except (TypeError, ValueError):
+                denegar()
+            if numero <= 0:
+                denegar()
+            return numero
+
+        iglesia_id = identificador("iglesia_id")
+        area_id = identificador(parametro_area)
+        if iglesia_id is None and area_id is None:
             denegar()
-        if iglesia_id <= 0:
-            denegar()
-        validar_alcance(usuario, iglesia_id, dinero=dinero)
+        validar_alcance(sesion, usuario, iglesia_id, dinero=dinero, area_id=area_id)
         return usuario
 
     return dependencia
