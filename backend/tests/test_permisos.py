@@ -52,7 +52,7 @@ from sqlalchemy.orm import Session
 from alembic import command
 from app.db import get_db
 from app.main import crear_app
-from app.modelos import Gasto, Grupo, Iglesia, Ingreso, Miembro, Usuario
+from app.modelos import CARGOS, Gasto, Grupo, Iglesia, Ingreso, Miembro, Usuario
 from app.modelos.utilidades import obtener_url_base_datos
 from app.seguridad.contrasenas import crear_hash
 from app.seguridad.tokens import crear_token
@@ -685,4 +685,223 @@ def test_el_lider_no_asigna_miembros_a_otro_grupo(api: Api) -> None:
     assert respuesta.status_code == 403
 
 
-# (las pruebas de las fases 2 y 3 siguen abajo)
+# ===========================================================================
+# FASE 2: escalamiento de cargos al crear y editar usuarios (D19 y D20)
+# ===========================================================================
+# Regla: nadie crea ni asigna un cargo con más acceso al dinero del que tiene. El apoyo solo
+# crea cargos sin dinero; el pastor crea al tesorero de su iglesia; solo el presbítero crea
+# pastores; nadie crea presbíteros desde la app; nadie, salvo el presbítero, cambia su cargo.
+
+# Cargos con los que el apoyo SÍ puede crear cuentas (PERM-48a): ninguno ve dinero.
+CARGOS_QUE_CREA_EL_APOYO = [
+    "lider_celula",
+    "lider_red",
+    "lider_ministerio",
+    "ujier",
+    "diacono",
+    "ministro",
+    "encargado_area",
+    "esposa_pastor",
+    "asistente",
+]
+# Cargos con los que el pastor SÍ puede crear cuentas (todos menos pastor y presbítero).
+CARGOS_QUE_CREA_EL_PASTOR = [c for c in CARGOS if c not in ("pastor", "presbitero")]
+# Cuentas que no administran usuarios: todo POST o GET de usuarios les da 403.
+CUENTAS_SIN_GESTION_DE_USUARIOS = [
+    "tesorero",
+    "lider_celula",
+    "lider_red",
+    "lider_ministerio",
+    "ujier",
+    "encargado_area",
+    "esposa_pastor",
+    "diacono",
+    "ministro",
+    "asistente",
+]
+
+
+def cuenta_nueva(iglesia_id: int | None, cargo: str) -> dict:
+    """Cuerpo de POST /usuarios con datos inventados (la contraseña se inventa y no se imprime)."""
+    return {
+        "nombre_usuario": f"nueva.{uuid.uuid4().hex[:10]}",
+        "nombre_completo": "Persona ficticia",
+        "cargo": cargo,
+        "iglesia_id": iglesia_id,
+        "contrasena": secrets.token_urlsafe(14),
+    }
+
+
+def cambios_de(api: Api, cuenta: str, **cambios) -> dict:
+    """Cuerpo de PUT /usuarios con los datos actuales de la cuenta y los cambios indicados."""
+    actual = api.sesion.get(Usuario, api.mundo.ids[cuenta])
+    base = {
+        "nombre_completo": actual.nombre_completo,
+        "cargo": actual.cargo,
+        "iglesia_id": actual.iglesia_id,
+        "activo": actual.activo,
+    }
+    return {**base, **cambios}
+
+
+@pytest.mark.parametrize("iglesia", [TERCERA, CUARTA, SEXTA, HUHI])
+@pytest.mark.parametrize("cargo", ["pastor", "tesorero", "ujier"])
+def test_el_presbitero_crea_usuarios_en_cualquier_iglesia(
+    api: Api, iglesia: str, cargo: str
+) -> None:
+    """PERM-46 y 46a: el presbítero crea cuentas en cualquier iglesia, también pastores."""
+    cuerpo = cuenta_nueva(api.mundo.iglesias[iglesia], cargo)
+    respuesta = api.post("/usuarios", "presbitero", cuerpo)
+    assert respuesta.status_code == 201
+    assert respuesta.json()["cargo"] == cargo
+    # La respuesta nunca devuelve la contraseña ni su hash.
+    assert cuerpo["contrasena"] not in respuesta.text
+    assert "hash" not in respuesta.text and "contrasena" not in respuesta.json()
+
+
+def test_nadie_crea_presbiteros_desde_la_app(api: Api) -> None:
+    """PERM-51a y D20 (7): ni el presbítero, ni el pastor, ni el apoyo crean un presbítero."""
+    for cuenta in ("presbitero", "pastor", "apoyo_pastor"):
+        cuerpo = cuenta_nueva(
+            None if cuenta == "presbitero" else api.mundo.iglesias[TERCERA], "presbitero"
+        )
+        assert api.post("/usuarios", cuenta, cuerpo).status_code == 403
+
+
+@pytest.mark.parametrize("cargo", CARGOS_QUE_CREA_EL_PASTOR)
+def test_el_pastor_crea_cuentas_de_su_iglesia(api: Api, cargo: str) -> None:
+    """PERM-47 y 53: con todos los cargos menos pastor y presbítero; incluye al tesorero."""
+    cuerpo = cuenta_nueva(api.mundo.iglesias[TERCERA], cargo)
+    respuesta = api.post("/usuarios", "pastor", cuerpo)
+    assert respuesta.status_code == 201
+    assert respuesta.json()["iglesia_id"] == api.mundo.iglesias[TERCERA]
+
+
+@pytest.mark.parametrize("cargo", CARGOS_QUE_CREA_EL_APOYO)
+def test_el_apoyo_crea_cuentas_sin_acceso_al_dinero(api: Api, cargo: str) -> None:
+    """PERM-48 y 48a (D19): el apoyo crea solo cargos que no ven dinero."""
+    cuerpo = cuenta_nueva(api.mundo.iglesias[TERCERA], cargo)
+    assert api.post("/usuarios", "apoyo_pastor", cuerpo).status_code == 201
+
+
+@pytest.mark.parametrize("cargo", ["tesorero", "pastor", "presbitero"])
+def test_el_apoyo_no_crea_cargos_con_dinero_ni_pastores(api: Api, cargo: str) -> None:
+    """PERM-52 y 52a (D19): nadie obtiene más dinero por otra cuenta; el apoyo recibe 403."""
+    cuerpo = cuenta_nueva(api.mundo.iglesias[TERCERA], cargo)
+    assert api.post("/usuarios", "apoyo_pastor", cuerpo).status_code == 403
+
+
+@pytest.mark.parametrize("cargo", ["pastor", "presbitero"])
+def test_el_pastor_no_crea_pastores_ni_presbiteros(api: Api, cargo: str) -> None:
+    """PERM-51 y 51a (D19): solo el presbítero crea pastores."""
+    cuerpo = cuenta_nueva(api.mundo.iglesias[TERCERA], cargo)
+    assert api.post("/usuarios", "pastor", cuerpo).status_code == 403
+
+
+@pytest.mark.parametrize("cuenta", ["pastor", "apoyo_pastor"])
+@pytest.mark.parametrize("ajena", IGLESIAS_AJENAS)
+@pytest.mark.parametrize("cargo", ["ujier", "tesorero"])
+def test_pastor_y_apoyo_no_crean_cuentas_en_otra_iglesia(
+    api: Api, cuenta: str, ajena: str, cargo: str
+) -> None:
+    """PERM-49 y 53a: solo dentro de su iglesia, aunque el cargo en sí esté permitido."""
+    cuerpo = cuenta_nueva(api.mundo.iglesias[ajena], cargo)
+    assert api.post("/usuarios", cuenta, cuerpo).status_code == 403
+
+
+@pytest.mark.parametrize("cuenta", CUENTAS_SIN_GESTION_DE_USUARIOS)
+def test_cuentas_sin_gestion_no_crean_ni_consultan_usuarios(api: Api, cuenta: str) -> None:
+    """PERM-50 y 56: solo presbítero, pastor y apoyo administran cuentas; los demás, 403."""
+    cuerpo = cuenta_nueva(api.mundo.iglesias[TERCERA], "ujier")
+    assert api.post("/usuarios", cuenta, cuerpo).status_code == 403
+    assert api.get("/usuarios", cuenta).status_code == 403
+    assert api.get(f"/usuarios/{api.mundo.ids['ujier']}", cuenta).status_code == 403
+
+
+@pytest.mark.parametrize("nuevo_cargo", ["lider_celula", "tesorero", "pastor"])
+def test_el_apoyo_no_cambia_su_propio_cargo(api: Api, nuevo_cargo: str) -> None:
+    """PERM-52b: el apoyo no se sube de cargo. Editar su nombre (mismo cargo) sí se permite."""
+    identificador = api.mundo.ids["apoyo_pastor"]
+    cambio = cambios_de(api, "apoyo_pastor", cargo=nuevo_cargo)
+    assert api.put(f"/usuarios/{identificador}", "apoyo_pastor", cambio).status_code == 403
+    mismo_cargo = cambios_de(api, "apoyo_pastor", nombre_completo="Nombre nuevo ficticio")
+    assert api.put(f"/usuarios/{identificador}", "apoyo_pastor", mismo_cargo).status_code == 200
+
+
+@pytest.mark.parametrize("nuevo_cargo", ["tesorero", "pastor"])
+def test_el_apoyo_no_sube_a_otro_a_tesorero_ni_pastor(api: Api, nuevo_cargo: str) -> None:
+    """PERM-52c (D19): tampoco cambiando el cargo de una cuenta que ya existe."""
+    identificador = api.mundo.ids["ujier"]
+    cambio = cambios_de(api, "ujier", cargo=nuevo_cargo)
+    assert api.put(f"/usuarios/{identificador}", "apoyo_pastor", cambio).status_code == 403
+
+
+@pytest.mark.parametrize("nuevo_cargo", ["presbitero", "pastor"])
+def test_el_pastor_no_sube_a_otro_a_presbitero_ni_pastor(api: Api, nuevo_cargo: str) -> None:
+    """PERM-51b (D19): el pastor tampoco asciende cuentas a presbítero o pastor."""
+    identificador = api.mundo.ids["ujier"]
+    cambio = cambios_de(api, "ujier", cargo=nuevo_cargo)
+    assert api.put(f"/usuarios/{identificador}", "pastor", cambio).status_code == 403
+
+
+def test_el_pastor_si_sube_a_otro_a_tesorero(api: Api) -> None:
+    """PERM-53 (por edición): el pastor puede dar el cargo de tesorero en su iglesia."""
+    identificador = api.mundo.ids["ujier"]
+    cambio = cambios_de(api, "ujier", cargo="tesorero")
+    respuesta = api.put(f"/usuarios/{identificador}", "pastor", cambio)
+    assert respuesta.status_code == 200
+    assert respuesta.json()["cargo"] == "tesorero"
+
+
+@pytest.mark.parametrize("cuenta", ["pastor", "apoyo_pastor", "tesorero", "lider_celula", "ujier"])
+def test_nadie_salvo_el_presbitero_cambia_su_propio_cargo(api: Api, cuenta: str) -> None:
+    """PERM-57 (D20, 8): ni el pastor ni los demás cargos se asignan otro cargo a sí mismos."""
+    identificador = api.mundo.ids[cuenta]
+    for nuevo_cargo in ("tesorero", "pastor", "presbitero"):
+        if nuevo_cargo == api.sesion.get(Usuario, identificador).cargo:
+            continue
+        cambio = cambios_de(api, cuenta, cargo=nuevo_cargo)
+        assert api.put(f"/usuarios/{identificador}", cuenta, cambio).status_code == 403
+
+
+def test_nadie_promueve_a_presbitero_desde_la_app(api: Api) -> None:
+    """D20 (7): ni siquiera el presbítero convierte a otra cuenta en presbítero."""
+    identificador = api.mundo.ids["ujier"]
+    cambio = cambios_de(api, "ujier", cargo="presbitero", iglesia_id=None)
+    assert api.put(f"/usuarios/{identificador}", "presbitero", cambio).status_code == 403
+
+
+def test_pastor_y_apoyo_solo_ven_las_cuentas_de_su_iglesia(api: Api) -> None:
+    """PERM-54 y 55: la lista trae solo su iglesia; una cuenta de otra iglesia es 403."""
+    propia = api.mundo.iglesias[TERCERA]
+    de_la_4ta = api.mundo.ids["pastor_4ta"]
+    for cuenta in ("pastor", "apoyo_pastor"):
+        lista = api.get("/usuarios", cuenta).json()
+        assert lista and {fila["iglesia_id"] for fila in lista} == {propia}
+        assert api.get(f"/usuarios/{de_la_4ta}", cuenta).status_code == 403
+        cambio = cambios_de(api, "pastor_4ta", activo=False)
+        assert api.put(f"/usuarios/{de_la_4ta}", cuenta, cambio).status_code == 403
+    # El presbítero, en cambio, ve las cuentas de todas las iglesias.
+    todas = api.get("/usuarios", "presbitero").json()
+    assert {propia, api.mundo.iglesias[CUARTA]} <= {fila["iglesia_id"] for fila in todas}
+
+
+def test_desactivar_una_cuenta_le_quita_el_acceso(api: Api) -> None:
+    """PERM-54 y EXTRA-06: el pastor desactiva al ujier y su sesión deja de valer (401)."""
+    assert api.get("/usuarios/yo", "ujier").status_code == 200
+    identificador = api.mundo.ids["ujier"]
+    cambio = cambios_de(api, "ujier", activo=False)
+    assert api.put(f"/usuarios/{identificador}", "pastor", cambio).status_code == 200
+    assert api.get("/usuarios/yo", "ujier").status_code == 401
+
+
+def test_el_apoyo_no_toca_cuentas_con_acceso_al_dinero(api: Api) -> None:
+    """Consecuencia de D19 (no está en el plan): el apoyo no edita ni desactiva al tesorero.
+
+    Si pudiera, desactivarlo o cambiarle datos le daría control indirecto sobre el dinero. El
+    pastor sí puede.
+    """
+    identificador = api.mundo.ids["tesorero"]
+    cambio = cambios_de(api, "tesorero", activo=False)
+    assert api.put(f"/usuarios/{identificador}", "apoyo_pastor", cambio).status_code == 403
+    assert api.put(f"/usuarios/{identificador}", "pastor", cambio).status_code == 200
