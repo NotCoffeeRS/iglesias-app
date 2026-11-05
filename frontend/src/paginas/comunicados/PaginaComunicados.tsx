@@ -12,7 +12,7 @@ import {
 function TarjetaComunicado({ comunicado }: { comunicado: Comunicado }) {
   return (
     <li className="rounded-2xl border border-borde bg-superficie p-4">
-      <h2 className="text-lg font-semibold">{comunicado.titulo}</h2>
+      <h2 className="break-words text-lg font-semibold">{comunicado.titulo}</h2>
       <p className="text-sm text-texto-suave">
         <span className="font-semibold text-texto">
           {comunicado.iglesia_id === null
@@ -22,9 +22,13 @@ function TarjetaComunicado({ comunicado }: { comunicado: Comunicado }) {
         · publicado el {fechaPublicacion(comunicado.publicado_en)} · vigente hasta{' '}
         {fechaLarga(comunicado.vigente_hasta)}
       </p>
-      <p className="mt-2 whitespace-pre-line">{comunicado.contenido}</p>
+      <p className="mt-2 whitespace-pre-line break-words">{comunicado.contenido}</p>
       <div className="mt-3">
-        <Link to={`/comunicados/${comunicado.id}/editar`} className={claseBotonSecundario}>
+        <Link
+          to={`/comunicados/${comunicado.id}/editar`}
+          aria-label={`Editar ${comunicado.titulo}`}
+          className={claseBotonSecundario}
+        >
           Editar
         </Link>
       </div>
