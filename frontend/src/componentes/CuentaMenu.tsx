@@ -39,7 +39,7 @@ export function BotonCerrarSesion({ alCerrar }: { alCerrar?: () => void }) {
           type="button"
           autoFocus
           onClick={() => setConfirmando(false)}
-          className="flex-1 rounded-lg border border-borde bg-superficie px-3 py-2 text-sm font-semibold text-texto"
+          className="flex-1 rounded-lg border border-borde bg-superficie px-3 py-2 text-sm font-semibold text-texto transition-colors hover:bg-resalte"
         >
           Cancelar
         </button>
