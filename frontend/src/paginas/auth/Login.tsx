@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { haySesion, iniciarSesion } from '../../api/auth'
 import { ErrorApi } from '../../api/cliente'
 import Logo from '../../componentes/Logo'
+import LogoIafcj from '../../componentes/LogoIafcj'
 
 function mensajeDeError(error: unknown): string {
   if (error instanceof ErrorApi) {
@@ -131,6 +132,10 @@ export default function Login() {
             {enviando ? 'Entrando…' : 'Entrar'}
           </button>
         </form>
+
+        <div className="mt-8 flex justify-center">
+          <LogoIafcj className="h-24 w-auto" />
+        </div>
       </div>
     </main>
   )
