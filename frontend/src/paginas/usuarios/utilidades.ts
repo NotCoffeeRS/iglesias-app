@@ -7,8 +7,9 @@ export function mensajeDeError(error: unknown, accion: string): string {
     if (error.estado === 0) return 'No se pudo conectar con el servidor. Revisa tu conexión.'
     if (error.estado === 403) return `No tienes permiso para ${accion}.`
     if (error.estado === 404) return 'Este usuario no existe o no está en tu alcance.'
-    if (error.estado === 409) return 'Ese nombre de usuario ya existe. Elige otro.'
-    if (error.estado === 422 || error.estado === 400) return error.message
+    // 409: nombre de usuario repetido o ficha de miembro ya ligada a otra cuenta; el servidor
+    // manda el motivo en español.
+    if (error.estado === 409 || error.estado === 422 || error.estado === 400) return error.message
   }
   return `No se pudo ${accion}. Inténtalo otra vez.`
 }

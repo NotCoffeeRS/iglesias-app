@@ -1,13 +1,15 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   actualizarUsuario,
   crearUsuario,
   listarIglesiasParaUsuarios,
+  listarMiembrosParaUsuarios,
   obtenerUsuario,
   obtenerYo,
   type Cargo,
   type IglesiaOpcion,
+  type MiembroOpcion,
   type Usuario,
   type Yo,
 } from '../../api/usuarios'
@@ -33,6 +35,7 @@ interface Formulario {
   nombre_completo: string
   cargo: Cargo | ''
   iglesia_id: string
+  miembro_id: string
   contrasena: string
   activo: boolean
 }
@@ -89,12 +92,37 @@ function Editor({
       : opcionesIglesia.length === 1
         ? String(opcionesIglesia[0].id)
         : '',
+    miembro_id: usuario?.miembro_id ? String(usuario.miembro_id) : '',
     contrasena: '',
     activo: usuario?.activo ?? true,
   })
   const [errores, setErrores] = useState<Errores>({})
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null)
   const [guardando, setGuardando] = useState(false)
+  // Fichas de miembro de la iglesia elegida (el presbítero no tiene iglesia: sin selector).
+  // `fichas.iglesia` dice de qué iglesia son; si no coincide con la elegida, siguen cargando.
+  const [fichas, setFichas] = useState<{
+    iglesia: string
+    lista: MiembroOpcion[]
+    error: boolean
+  }>({ iglesia: '', lista: [], error: false })
+
+  useEffect(() => {
+    if (esPresbitero || !f.iglesia_id) return
+    let vigente = true
+    const iglesia = f.iglesia_id
+    listarMiembrosParaUsuarios(Number(iglesia))
+      .then((lista) => vigente && setFichas({ iglesia, lista, error: false }))
+      .catch(() => vigente && setFichas({ iglesia, lista: [], error: true }))
+    return () => {
+      vigente = false
+    }
+  }, [esPresbitero, f.iglesia_id])
+
+  const fichasListas = fichas.iglesia === f.iglesia_id
+  const fichasCargando = !!f.iglesia_id && !fichasListas
+  const opcionesFicha = fichasListas ? fichas.lista : []
+  const fichasConError = fichasListas && fichas.error
 
   const cambiar = <K extends keyof Formulario>(campo: K, valor: Formulario[K]) =>
     setF((actual) => ({ ...actual, [campo]: valor }))
@@ -125,6 +153,7 @@ function Editor({
           nombre_completo: f.nombre_completo.trim(),
           cargo: f.cargo as Cargo,
           iglesia_id: esPresbitero ? null : Number(f.iglesia_id),
+          miembro_id: f.miembro_id ? Number(f.miembro_id) : null,
           activo: f.activo,
         })
       } else {
@@ -133,6 +162,7 @@ function Editor({
           nombre_completo: f.nombre_completo.trim(),
           cargo: f.cargo as Cargo,
           iglesia_id: Number(f.iglesia_id),
+          miembro_id: f.miembro_id ? Number(f.miembro_id) : null,
           contrasena: f.contrasena,
         })
       }
@@ -249,7 +279,9 @@ function Editor({
             ) : (
               <select
                 value={f.iglesia_id}
-                onChange={(e) => cambiar('iglesia_id', e.target.value)}
+                onChange={(e) =>
+                  setF((a) => ({ ...a, iglesia_id: e.target.value, miembro_id: '' }))
+                }
                 disabled={iglesiaFija}
                 aria-invalid={errores.iglesia_id ? true : undefined}
                 className={claseCampo}
@@ -264,6 +296,39 @@ function Editor({
             )}
           </Etiqueta>
         </div>
+
+        {!esPresbitero && (
+          <Etiqueta
+            texto="Ficha de miembro"
+            error={errores.miembro_id}
+            ayuda={
+              fichasConError
+                ? 'No se pudieron cargar las fichas. Puedes guardar sin ficha y ligarla después.'
+                : !f.iglesia_id
+                  ? 'Elige primero la iglesia.'
+                  : 'Opcional. De la ficha sale el área de la persona: los grupos que dirige.'
+            }
+          >
+            <select
+              value={f.miembro_id}
+              onChange={(e) => cambiar('miembro_id', e.target.value)}
+              disabled={!f.iglesia_id || fichasCargando}
+              className={claseCampo}
+            >
+              <option value="">
+                {fichasCargando ? 'Cargando fichas…' : 'Sin ficha de miembro'}
+              </option>
+              {f.miembro_id && !opcionesFicha.some((m) => String(m.id) === f.miembro_id) && (
+                <option value={f.miembro_id}>Ficha actual</option>
+              )}
+              {opcionesFicha.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.nombre}
+                </option>
+              ))}
+            </select>
+          </Etiqueta>
+        )}
 
         {usuario && (
           <label className="flex items-start gap-3 text-sm">
