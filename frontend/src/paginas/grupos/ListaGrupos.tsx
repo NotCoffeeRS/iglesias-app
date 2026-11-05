@@ -30,7 +30,7 @@ export default function ListaGrupos() {
       'block rounded-full px-3.5 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors',
       activo
         ? 'bg-primario text-sobre-primario'
-        : 'border border-borde bg-superficie text-texto hover:bg-superficie-2',
+        : 'border border-borde bg-superficie text-texto hover:bg-resalte',
     ].join(' ')
 
   return (
@@ -112,7 +112,7 @@ export default function ListaGrupos() {
                 <Link
                   to={`/grupos/${g.id}/editar`}
                   className={[
-                    'block h-full rounded-3xl border border-l-[6px] border-borde bg-superficie p-4 transition-colors hover:bg-superficie-2',
+                    'block h-full rounded-3xl border border-l-[6px] border-borde bg-superficie p-4 transition-colors hover:bg-resalte',
                     estiloTipo(g.tipo).barra,
                   ].join(' ')}
                 >

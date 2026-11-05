@@ -147,7 +147,7 @@ function Integrantes({ grupo, gestor }: { grupo: GrupoAsignaciones; gestor: bool
                   </p>
                 </div>
                 <button
-                  className={claseBotonSecundario}
+                  className={claseBotonSecundario + ' text-peligro!'}
                   type="button"
                   onClick={() => setPorQuitar(m.id)}
                   disabled={ocupado}
@@ -162,7 +162,9 @@ function Integrantes({ grupo, gestor }: { grupo: GrupoAsignaciones; gestor: bool
                   <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
-                      className={claseBotonPrincipal}
+                      className={
+                        claseBotonPrincipal + ' bg-peligro! hover:bg-peligro! hover:opacity-90'
+                      }
                       disabled={ocupado}
                       onClick={() =>
                         void operar(

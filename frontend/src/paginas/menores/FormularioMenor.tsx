@@ -231,7 +231,7 @@ function Editor({
                 />
               </Campo>
               <button
-                className={claseBotonSecundario}
+                className={claseBotonSecundario + ' text-peligro!'}
                 type="button"
                 disabled={tutores.length === 1}
                 onClick={() => setTutores((lista) => lista.filter((_, n) => n !== i))}

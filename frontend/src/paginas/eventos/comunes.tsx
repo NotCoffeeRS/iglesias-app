@@ -33,7 +33,7 @@ export function Volver({ a, children }: { a: string; children: ReactNode }) {
   return (
     <Link
       to={a}
-      className="-ml-2 inline-flex items-center gap-1 rounded-xl px-2 py-1 text-sm font-semibold text-enlace hover:bg-superficie-2"
+      className="-ml-2 inline-flex items-center gap-1 rounded-xl px-2 py-1 text-sm font-semibold text-enlace hover:bg-resalte"
     >
       <svg
         viewBox="0 0 24 24"

@@ -12,6 +12,8 @@
   --c-fondo: #f1e9d8;
   --c-superficie: #ffffff;
   --c-superficie-2: #f8f3e8;
+  /* Fila de una lista al pasar el cursor: un verde-agua suave, distinto del fondo crema. */
+  --c-resalte: #e3f0ed;
   --c-borde: #e2d7c1;
   --c-texto: #11343b;
   --c-texto-suave: #4f6b6f;
@@ -43,6 +45,7 @@
     --c-fondo: #0b2227;
     --c-superficie: #10313a;
     --c-superficie-2: #153b44;
+    --c-resalte: #1b4a53;
     --c-borde: #23505a;
     --c-texto: #eaf2ef;
     --c-texto-suave: #a5c0bc;
@@ -72,6 +75,7 @@
   --color-fondo: var(--c-fondo);
   --color-superficie: var(--c-superficie);
   --color-superficie-2: var(--c-superficie-2);
+  --color-resalte: var(--c-resalte);
   --color-borde: var(--c-borde);
   --color-texto: var(--c-texto);
   --color-texto-suave: var(--c-texto-suave);

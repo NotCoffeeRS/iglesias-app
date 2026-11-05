@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Icono from '../../componentes/Icono'
 import { Link, useLocation } from 'react-router-dom'
 import { listarMenores } from '../../api/menores'
 import { obtenerYo } from '../../api/usuarios'
@@ -53,12 +54,18 @@ export default function ListaMenores() {
       )}
       <label className="block text-sm font-semibold">
         Buscar por nombre
-        <input
-          type="search"
-          className={claseCampo}
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-        />
+        <span className="relative mt-1.5 block">
+          <Icono
+            nombre="buscar"
+            className="pointer-events-none absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-texto-suave"
+          />
+          <input
+            type="search"
+            className={claseCampo + ' mt-0! pl-11'}
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+        </span>
       </label>
       {menores.length === 0 ? (
         <p className="rounded-2xl border border-borde bg-superficie p-6">

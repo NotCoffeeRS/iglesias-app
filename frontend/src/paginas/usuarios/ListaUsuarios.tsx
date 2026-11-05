@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import Icono from '../../componentes/Icono'
 import { Link, useLocation } from 'react-router-dom'
 import { listarUsuarios, obtenerYo, type UsuarioResumen } from '../../api/usuarios'
 import { Cargando, ErrorConReintento, SinPermiso } from './comunes'
@@ -33,7 +34,7 @@ function Fila({ u, editable }: { u: UsuarioResumen; editable: boolean }) {
   return editable ? (
     <Link
       to={`/usuarios/${u.id}/editar`}
-      className="block px-4 py-3.5 transition-colors hover:bg-superficie-2"
+      className="block px-4 py-3.5 transition-colors hover:bg-resalte"
     >
       {contenido}
     </Link>
@@ -101,13 +102,19 @@ export default function ListaUsuarios() {
           <>
             <label className="block max-w-md text-sm font-semibold">
               Buscar por nombre o usuario
-              <input
-                type="search"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                autoComplete="off"
-                className={claseCampo}
-              />
+              <span className="relative mt-1.5 block">
+                <Icono
+                  nombre="buscar"
+                  className="pointer-events-none absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-texto-suave"
+                />
+                <input
+                  type="search"
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  autoComplete="off"
+                  className={claseCampo + ' mt-0! pl-11'}
+                />
+              </span>
             </label>
             <div className="mt-4">
               {visibles.length === 0 ? (

@@ -12,6 +12,8 @@ export const menu: ModuloRutas['menu'] = [
     ruta: '/menores',
     etiqueta: 'Niños y adolescentes',
     orden: 25,
+    seccion: 'personas',
+    icono: 'menores',
     cargos: ['presbitero', 'pastor', 'apoyo_pastor'],
     descripcion: 'Registro de menores y sus tutores',
   },
