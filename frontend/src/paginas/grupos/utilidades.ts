@@ -7,7 +7,8 @@ export function mensajeDeError(error: unknown, accion: string): string {
     if (error.estado === 0) return 'No se pudo conectar con el servidor. Revisa tu conexión.'
     if (error.estado === 403) return `No tienes permiso para ${accion}.`
     if (error.estado === 404) return 'Este grupo no existe o no está en tu alcance.'
-    if (error.estado === 422 || error.estado === 400) return error.message
+    // 409: nombre repetido o cambio no permitido con integrantes; el servidor manda el motivo.
+    if (error.estado === 409 || error.estado === 422 || error.estado === 400) return error.message
   }
   return `No se pudo ${accion}. Inténtalo otra vez.`
 }
