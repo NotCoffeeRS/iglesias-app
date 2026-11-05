@@ -32,7 +32,7 @@ function TarjetaEvento({ evento, alCambiar }: { evento: Evento; alCambiar: (e: E
     <li className="rounded-2xl border border-borde bg-superficie p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <h2 className={'text-lg font-semibold ' + (evento.cancelado ? 'line-through' : '')}>
+          <h2 className={'break-words text-lg font-semibold ' + (evento.cancelado ? 'line-through' : '')}>
             {evento.titulo}
           </h2>
           <p className="text-sm text-texto-suave">
@@ -54,11 +54,15 @@ function TarjetaEvento({ evento, alCambiar }: { evento: Evento; alCambiar: (e: E
         </span>
         {evento.lugar && <span className="text-texto-suave"> · {evento.lugar}</span>}
       </p>
-      {evento.descripcion && <p className="mt-2 whitespace-pre-line">{evento.descripcion}</p>}
+      {evento.descripcion && <p className="mt-2 whitespace-pre-line break-words">{evento.descripcion}</p>}
 
       {!evento.cancelado && (
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <Link to={`/eventos/${evento.id}/editar`} className={claseBotonSecundario}>
+          <Link
+            to={`/eventos/${evento.id}/editar`}
+            aria-label={`Editar ${evento.titulo}`}
+            className={claseBotonSecundario}
+          >
             Editar
           </Link>
           {confirmando ? (
