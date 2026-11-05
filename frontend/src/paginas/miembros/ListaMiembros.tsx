@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import Icono from '../../componentes/Icono'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { ESTADOS, listarMiembros, type EstadoMiembro } from '../../api/miembros'
 import { obtenerYo } from '../../api/usuarios'
@@ -81,13 +82,19 @@ export default function ListaMiembros() {
 
       <label className="mt-5 block max-w-md text-sm font-semibold">
         Buscar por nombre
-        <input
-          type="search"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          autoComplete="off"
-          className={claseCampo}
-        />
+        <span className="relative mt-1.5 block">
+          <Icono
+            nombre="buscar"
+            className="pointer-events-none absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-texto-suave"
+          />
+          <input
+            type="search"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            autoComplete="off"
+            className={claseCampo + ' mt-0! pl-11'}
+          />
+        </span>
       </label>
 
       <nav
