@@ -13,8 +13,7 @@ from app.db import get_db
 from app.modelos import Usuario
 from app.modelos.listas import TIPOS_SERVICIO_ASISTENCIA
 from app.modulos.asistencia.schemas import GuardarHoja, HojaRespuesta, hoy
-from app.modulos.asistencia.servicio import guardar_hoja, obtener_hojas
-from app.seguridad.permisos import obtener_usuario_actual
+from app.modulos.asistencia.servicio import guardar_hoja, obtener_hojas, obtener_usuario_actual
 
 ETIQUETAS = {
     "fecha": "la fecha",
