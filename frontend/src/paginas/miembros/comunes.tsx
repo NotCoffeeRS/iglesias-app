@@ -32,13 +32,19 @@ export function ErrorConReintento({
   )
 }
 
+// Un color por grupo de estados; el nombre del estado siempre va escrito en la etiqueta.
+const VERDE = 'bg-green-100 text-green-900 dark:bg-green-500/25 dark:text-green-200'
+const AZUL = 'bg-sky-100 text-sky-900 dark:bg-sky-500/25 dark:text-sky-200'
+const DORADO = 'bg-amber-100 text-amber-900 dark:bg-amber-500/25 dark:text-amber-200'
+const GRIS = 'bg-stone-200 text-stone-700 dark:bg-stone-500/30 dark:text-stone-200'
+
 const ESTILO_ESTADO: Record<EstadoMiembro, string> = {
-  activo: 'bg-acento text-acento-texto',
-  visitante: 'border border-enlace text-enlace',
-  en_proceso_ganar: 'bg-superficie-2 text-texto',
-  en_proceso_consolidar: 'bg-superficie-2 text-texto',
-  en_proceso_discipular: 'bg-superficie-2 text-texto',
-  inactivo: 'text-texto-suave border border-borde',
+  activo: VERDE,
+  visitante: AZUL,
+  en_proceso_ganar: DORADO,
+  en_proceso_consolidar: DORADO,
+  en_proceso_discipular: DORADO,
+  inactivo: GRIS,
 }
 
 export function EtiquetaEstado({ estado }: { estado: EstadoMiembro }) {
