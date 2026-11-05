@@ -111,7 +111,7 @@ export default function ListaGrupos() {
               <li key={g.id}>
                 <Link
                   to={`/grupos/${g.id}/editar`}
-                  className="block h-full rounded-3xl border border-borde bg-superficie p-4 transition-colors hover:bg-superficie-2"
+                  className="block h-full rounded-3xl border border-borde bg-superficie p-4 transition-colors hover:bg-resalte"
                 >
                   <span className="flex items-start justify-between gap-3">
                     <span className="font-titulo text-lg font-semibold text-primario">

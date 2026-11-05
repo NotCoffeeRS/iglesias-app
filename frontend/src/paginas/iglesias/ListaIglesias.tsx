@@ -33,7 +33,7 @@ export default function ListaIglesias() {
               <li key={iglesia.id}>
                 <Link
                   to={`/iglesias/${iglesia.id}`}
-                  className="flex h-full items-center gap-4 rounded-3xl border border-borde bg-superficie p-4 transition-colors hover:bg-superficie-2"
+                  className="flex h-full items-center gap-4 rounded-3xl border border-borde bg-superficie p-4 transition-colors hover:bg-resalte"
                 >
                   {esEnlaceSeguro(iglesia.foto_url) ? (
                     <img
