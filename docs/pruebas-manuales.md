@@ -5,7 +5,7 @@ Lista de pruebas manuales y recorrido en el navegador para la entrega (Issue #35
 > **Cómo leer este documento.** Cada fila separa dos cosas que no deben mezclarse:
 >
 > - **Esperado según el código:** lo que se deduce de **leer el código** (menús, permisos, respuestas del servidor). **No es un resultado de prueba.**
-> - **Resultado en el navegador:** lo que **Jessica vio** en su recorrido del 5 nov 2026. Lo que no se probó dice **"sin probar"**, y lo que no se pudo precisar dice **"POR CONFIRMAR"**.
+> - **Resultado en el navegador:** lo que **Jessica vio** en su recorrido del 5 nov 2026, hecho en dos tandas (ver la sección 1). Lo que no se probó dice **"sin probar"**, y lo que no se pudo precisar dice **"POR CONFIRMAR"**.
 >
 > No se afirma ningún resultado que no haya sido observado. Las contraseñas de las cuentas **no están en este documento ni en el repositorio**.
 
@@ -15,7 +15,8 @@ Lista de pruebas manuales y recorrido en el navegador para la entrega (Issue #35
 |---|---|
 | Fecha del recorrido | 5 nov 2026 |
 | Quién probó | Jessica (en el navegador, en su computadora) |
-| Código | Rama `main`. La API se arrancó con el código de `main` en el commit **`b3bf76c`**. Después `main` solo avanzó con documentación (`23c1c7d` y `5e6a14f`): el backend y el frontend son los mismos |
+| Código, 1ª tanda | Rama `main`. La API se arrancó con el código de `main` en el commit **`b3bf76c`**. Después `main` solo avanzó con documentación (`23c1c7d` y `5e6a14f`): el backend y el frontend son los mismos |
+| Código, 2ª tanda | Jessica hizo `git pull` de `5e6a14f` a **`c8793b9`** (el historial local del clon lo confirma), reinició a mano la API y la web y probó otra vez con las 6 cuentas. Este código ya trae el menú agrupado, "Mi cuenta" y los reportes financiero y de asistencia. Los resultados de la 2ª tanda están en la sección 3.8 |
 | Base de datos | **`iglesias_demo`** en PostgreSQL 17 local, migraciones aplicadas hasta `0002` |
 | API | `uvicorn` **sin** `--reload`, puerto 8000 |
 | Web | `npm run dev`, puerto 5173 (`http://localhost:5173`) |
@@ -43,7 +44,7 @@ El Issue pide: **login, iglesia, miembro, ingreso, gasto y reporte**.
 | Miembro | **Parcial** | El formulario `/miembros/nuevo` abre con el tesorero y con el líder de célula (no se guardó nada). Registrar y consultar la lista de miembros: **sin probar** |
 | Ingreso | **Parcial** | Se consultan con el tesorero, con el presbítero y con una cuenta que fue el pastor o el tesorero (POR CONFIRMAR; ver la sección 3). Registrar y anular: **sin probar** |
 | Gasto | **Parcial** | Igual que ingresos: se consultan; registrar y anular: **sin probar** |
-| Reporte | **Pendiente** | El reporte financiero (#29) todavía no existe. Ver la sección 6 |
+| Reporte | **Parcial** | En la 1ª tanda el reporte financiero (#29) todavía no existía. En la 2ª (`c8793b9`) se **vio** el reporte financiero con presbítero, pastor y tesorero, y el de asistencia con el pastor y el ujier. Los totales y el detalle por cuenta: **POR CONFIRMAR** (ver la sección 3.8) |
 
 ## 3. Matriz cuenta × módulo
 
@@ -67,7 +68,7 @@ Los datos "esperados" del mes salen de los datos de ejemplo: el 1 de nov hay ing
 | Niños y adolescentes (`/menores`) | Lista vacía (los datos de ejemplo no traen menores) y el botón "Registrar menor" | **Lista vacía con "Registrar menor"** |
 | Asignaciones | Los 6 grupos de la 3ra | **POR CONFIRMAR** (ver la nota de abajo) |
 | Miembros, Grupos, Usuarios, Iglesias, Eventos, Comunicados | Visibles en el menú | Sin probar |
-| Reporte financiero | La API no existe todavía (#29) | Sin probar (pendiente) |
+| Reporte financiero | En la 1ª tanda (`b3bf76c`) la API no existía todavía (#29); ya existe | Sin probar en la 1ª tanda. 2ª tanda: ver la sección 3.8 |
 
 > **Nota (POR CONFIRMAR).** Se vio una cuenta con **menú completo** y **Asignaciones con los 6 grupos de la 3ra**. Pudo ser el presbítero o el pastor; no se distinguió cuál era. Por eso esas dos filas del presbítero y las del pastor quedan por confirmar.
 
@@ -99,7 +100,7 @@ Los datos "esperados" del mes salen de los datos de ejemplo: el 1 de nov hay ing
 | `/miembros/nuevo` | El formulario abre (la web solo oculta el menú, no bloquea la dirección); el 403 llega al guardar | **El formulario abre** (no se guardó nada; el 403 al guardar: sin probar) |
 | `/menores` | "Sin acceso" | **"Sin acceso"** |
 | Asignaciones | No aparece en el menú | **Sin Asignaciones en el menú** |
-| Reporte financiero | La API no existe todavía (#29) | Sin probar (pendiente) |
+| Reporte financiero | En la 1ª tanda (`b3bf76c`) la API no existía todavía (#29); ya existe | Sin probar en la 1ª tanda. 2ª tanda: ver la sección 3.8 |
 
 ### 3.6 Líder de célula (`lider.celula.ejemplo`)
 
@@ -118,6 +119,23 @@ Los datos "esperados" del mes salen de los datos de ejemplo: el 1 de nov hay ing
 |---|---|---|
 | Menú | Inicio, Asistencia, Iglesias, Horarios, Eventos, Comunicados. Sin Asignaciones | **Coincide:** Inicio, Asistencia, Iglesias, Horarios, Eventos, Comunicados. **Sin Asignaciones** |
 | Asistencia | La lista de los miembros sin célula de su iglesia, para marcar quién faltó | Sin probar |
+
+### 3.8 Segunda tanda: menú agrupado, "Mi cuenta" y reportes (código `c8793b9`)
+
+Jessica volvió a entrar con las 6 cuentas después de actualizar el código (ver la sección 1). Aquí van **solo sus observaciones**, con las palabras que usó. Lo que no dijo queda como **POR CONFIRMAR** o **sin probar**; no se completó nada por deducción.
+
+Lo "esperado" sale de leer el código: el menú se agrupa en Iglesia, Personas y Dinero; el reporte financiero lo ven presbítero, pastor y tesorero (el servidor le responde 403 a los demás), y el presbítero, si no elige una iglesia, recibe además un consolidado; el reporte de asistencia lo ven todos los cargos menos el tesorero, con alcance por cargo (el presbítero, todas las iglesias; pastor y apoyo, su iglesia; el ujier, los miembros sin célula de su iglesia; el líder de célula, los integrantes de los grupos que dirige).
+
+| Cuenta | Esperado según el código | Resultado en el navegador |
+|---|---|---|
+| Presbítero | Reporte financiero con las 4 iglesias y consolidado. Menú agrupado. "Mi cuenta" en el menú | **Reporte financiero con las 4 iglesias; menú agrupado; "Mi cuenta" (perfil) visible.** Si apareció el consolidado y los totales: **POR CONFIRMAR**. Reporte de asistencia: **sin probar** |
+| Pastor | Reporte financiero y de asistencia, solo de su iglesia (la 3ra). Sin consolidado | **Ve el reporte financiero y el de asistencia; el menú y "Mi cuenta" se ven bien.** Qué iglesias salieron y los totales: **POR CONFIRMAR** |
+| Tesorero | Reporte financiero solo de su iglesia. Sin reporte de asistencia | **Se ve el reporte financiero; el menú y "Mi cuenta" se ven bien.** Qué iglesias salieron y los totales: **POR CONFIRMAR**. Si le aparece el reporte de asistencia: **sin probar** |
+| Apoyo del pastor | Sin reporte financiero. Con reporte de asistencia de su iglesia | **No tiene reporte financiero; lo demás normal.** Si le aparece el reporte de asistencia: **POR CONFIRMAR** |
+| Líder de célula | Sin reporte financiero. Reporte de asistencia solo con los integrantes de los grupos que dirige | **"Cuenta con lo acordado, se ve bien".** Qué módulos y reportes ve exactamente: **POR CONFIRMAR** |
+| Ujier | Sin reporte financiero. Reporte de asistencia con los miembros sin célula de su iglesia | **Aparece el reporte de asistencia.** Qué datos muestra: **POR CONFIRMAR** |
+
+Siguen **sin probar** en la 2ª tanda: el cierre de sesión desde "Mi cuenta", y si el consolidado del reporte financiero apareció solo para el presbítero.
 
 ## 4. Horarios y ubicaciones
 
@@ -157,14 +175,14 @@ Cargados con `backend/scripts/cargar_datos_ejemplo.py` (Issue #5). El script no 
 - Sin sesión, `/ingresos`, `/gastos`, `/menores` y `/asignaciones/grupos` responden **401**.
 - Sin sesión, `/publico/iglesias` (horarios y ubicaciones) responde 200.
 
-Los casos de sesión (sin sesión, token vencido o alterado, credenciales incorrectas y cuenta desactivada) están cubiertos por pruebas automáticas en el **PR #99** (`backend/tests/test_permisos.py`), pendiente de fusión al escribir esto.
+Los casos de sesión (sin sesión, token vencido o alterado, credenciales incorrectas y cuenta desactivada) están cubiertos por pruebas automáticas en el **PR #99** (`backend/tests/test_permisos.py`), fusionado en `main` (commit `488f5fc`).
 
 ## 7. Pendientes
 
 | Pendiente | Detalle |
 |---|---|
-| **Reporte financiero** (#29) | No existe la API; el paso "reporte" del recorrido no se pudo probar. Lo tomó Ángeles |
-| **Reporte de asistencia** (#31) | No existe todavía. Lo tomó Ángeles |
+| **Reporte financiero** (#29) | Ya existe en `main`. En la 2ª tanda se **vio** con presbítero, pastor y tesorero (no con el apoyo). Falta anotar qué iglesias y qué totales salieron en cada cuenta, y si el consolidado apareció solo para el presbítero (sección 3.8) |
+| **Reporte de asistencia** (#31) | Ya existe en `main`. En la 2ª tanda se **vio** con el pastor y el ujier. Falta anotar qué datos muestra cada cuenta, en especial el líder de célula y el ujier, y si aparece con el presbítero, el apoyo y el líder (sección 3.8) |
 | **`backend/tests/test_recorrido.py`** | La prueba automática del recorrido (la otra mitad del Issue #35) **no se hizo todavía** |
 | Registrar y anular ingresos y gastos en el navegador | Sin probar |
 | Registrar miembros, menores, eventos y comunicados | Sin probar (solo se abrió el formulario en algunas cuentas) |
