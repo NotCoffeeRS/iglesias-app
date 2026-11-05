@@ -321,7 +321,7 @@ def test_la_base_de_prueba_trae_los_datos_de_ejemplo_y_las_cuentas(api: Api) -> 
     respuesta = api.get("/usuarios/yo", "presbitero")
     assert respuesta.status_code == 200
     assert respuesta.json()["cargo"] == "presbitero"
-    # Las cuentas extra también quedaron creadas, y la desactivada está desactivada.
+    # Las cuentas extra también quedaron creadas.
     assert api.get("/usuarios/yo", "pastor_4ta").json()["cargo"] == "pastor"
     assert len(api.mundo.iglesias) == 4
     assert len(api.mundo.grupos) == 6
@@ -1023,7 +1023,7 @@ def test_credenciales_incorrectas_dan_el_mismo_401_sin_revelar_cual_fallo(api: A
     assert clave not in mala.text + falso.text
 
 
-def test_una_cuenta_desactivada_no_inicia_sesion_ni_con_la_contraseña_correcta(api: Api) -> None:
+def test_una_cuenta_desactivada_no_inicia_sesion_ni_con_la_contrasena_correcta(api: Api) -> None:
     """EXTRA-05: el login la rechaza con el mismo 401 de cualquier error de credenciales."""
     respuesta = api.cliente.post(
         "/auth/login",
