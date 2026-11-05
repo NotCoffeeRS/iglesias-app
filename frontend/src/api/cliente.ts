@@ -48,6 +48,14 @@ export class ErrorApi extends Error {
   }
 }
 
+/**
+ * La ruta no existe en la API (FastAPI responde 404 "Not Found"): la función aún no está lista.
+ * No es lo mismo que un registro que ya no existe, cuyo 404 trae un motivo en español.
+ */
+export function esRutaInexistente(error: unknown): boolean {
+  return error instanceof ErrorApi && error.estado === 404 && error.message === 'Not Found'
+}
+
 type Metodo = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 /** Convierte el `detail` de FastAPI (texto o lista de validaciones) en un mensaje legible. */
