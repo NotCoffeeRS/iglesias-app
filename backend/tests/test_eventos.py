@@ -171,7 +171,9 @@ def test_presbitero_crea_para_todo_el_presbiterio(cliente, mundo):
 
 def test_pastor_y_apoyo_crean_en_su_iglesia(cliente, mundo):
     for quien in ("pastor4", "apoyo4"):
-        evento = crear_evento(cliente, mundo, quien, iglesia_id=mundo["cuarta"].id)
+        evento = crear_evento(
+            cliente, mundo, quien, iglesia_id=mundo["cuarta"].id, titulo=f"Retiro de {quien}"
+        )
         assert evento["iglesia_nombre"] == "4ta IAFCJ de Mérida"
 
 
@@ -364,7 +366,15 @@ def test_editar_un_evento_ajeno_da_404(cliente, mundo):
     assert respuesta.status_code == 404
 
 
-def test_se_puede_corregir_un_evento_sin_exigir_fecha_futura(cliente, mundo, sesion):
+def test_no_se_mueve_un_evento_al_pasado(cliente, mundo):
+    evento = crear_evento(cliente, mundo, "presbitero")
+    respuesta = cliente.put(
+        f"/eventos/{evento['id']}", json=cuerpo(fecha=AYER), headers=cabecera(mundo, "presbitero")
+    )
+    assert respuesta.status_code == 422
+
+
+def test_se_corrige_otro_dato_de_un_evento_que_ya_paso(cliente, mundo, sesion):
     evento = crear_evento(cliente, mundo, "presbitero", fecha=HOY)
     sesion.get(Evento, evento["id"]).fecha = AYER
     sesion.flush()
@@ -376,6 +386,17 @@ def test_se_puede_corregir_un_evento_sin_exigir_fecha_futura(cliente, mundo, ses
     assert respuesta.status_code == 200
     assert respuesta.json()["titulo"] == "Corregido"
     assert respuesta.json()["fecha"] == AYER.isoformat()
+
+
+def test_presbitero_mueve_un_evento_a_otra_iglesia(cliente, mundo):
+    evento = crear_evento(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+    respuesta = cliente.put(
+        f"/eventos/{evento['id']}",
+        json=cuerpo(iglesia_id=mundo["sexta"].id),
+        headers=cabecera(mundo, "presbitero"),
+    )
+    assert respuesta.status_code == 200
+    assert respuesta.json()["iglesia_nombre"] == "6ta IAFCJ de Mérida"
 
 
 # ---- Cancelar ---------------------------------------------------------------------------------
@@ -434,3 +455,88 @@ def test_el_presbitero_cancela_cualquiera(cliente, mundo):
         ).status_code
         == 200
     )
+
+
+# ---- Casos de consulta y de formato --------------------------------------------------------------
+
+
+def test_pastor_consulta_el_detalle_de_su_evento(cliente, mundo):
+    evento = crear_evento(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+    respuesta = cliente.get(f"/eventos/{evento['id']}", headers=cabecera(mundo, "pastor4"))
+    assert respuesta.status_code == 200
+    assert respuesta.json()["id"] == evento["id"]
+
+
+def test_pastor_filtra_por_su_propia_iglesia(cliente, mundo):
+    general = crear_evento(cliente, mundo, "presbitero", iglesia_id=None)
+    propio = crear_evento(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+    ruta = f"/eventos?iglesia_id={mundo['cuarta'].id}"
+    ids = {e["id"] for e in cliente.get(ruta, headers=cabecera(mundo, "pastor4")).json()}
+    assert ids == {general["id"], propio["id"]}
+
+
+def test_un_doble_envio_no_crea_dos_eventos(cliente, mundo):
+    crear_evento(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+    repetido = cliente.post(
+        "/eventos", json=cuerpo(iglesia_id=mundo["cuarta"].id), headers=cabecera(mundo, "pastor4")
+    )
+    assert repetido.status_code == 409
+    # El mismo evento en otra iglesia o para todo el Presbiterio no es un duplicado.
+    crear_evento(cliente, mundo, "presbitero", iglesia_id=None)
+    crear_evento(cliente, mundo, "presbitero", iglesia_id=mundo["sexta"].id)
+
+
+def test_un_evento_cancelado_no_cuenta_como_duplicado(cliente, mundo):
+    primero = crear_evento(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+    cliente.post(f"/eventos/{primero['id']}/cancelar", headers=cabecera(mundo, "pastor4"))
+    crear_evento(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+
+
+@pytest.mark.parametrize(
+    ("cambio", "texto"),
+    [
+        ({"titulo": ""}, "Escribe un título"),
+        ({"titulo": "x" * 151}, "Escribe un título"),
+        ({"fecha": "mañana"}, "fecha válida"),
+        ({"hora": "7pm"}, "hora válida"),
+        ({"hora": "19:30+00:00"}, "hora válida"),
+        ({"lugar": "x" * 201}, "hasta 200 letras"),
+    ],
+)
+def test_los_errores_de_formato_salen_en_espanol(cliente, mundo, cambio, texto):
+    respuesta = cliente.post(
+        "/eventos", json=cuerpo() | cambio, headers=cabecera(mundo, "presbitero")
+    )
+    assert respuesta.status_code == 422
+    assert [e["msg"] for e in respuesta.json()["detail"]] == [
+        next(m for m in MENSAJES_ESPERADOS if texto in m)
+    ]
+
+
+MENSAJES_ESPERADOS = [
+    "Escribe un título de 1 a 150 letras.",
+    "Escribe una fecha válida.",
+    "Escribe una hora válida, sin zona horaria, como 19:30.",
+    "El lugar admite hasta 200 letras.",
+]
+
+
+def test_editar_y_cancelar_toman_el_candado_de_la_fila(cliente, mundo, sesion):
+    from sqlalchemy import event
+
+    evento = crear_evento(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+    sentencias = []
+    conexion = sesion.get_bind()
+
+    @event.listens_for(conexion, "before_cursor_execute")
+    def guardar(_conexion, _cursor, sentencia, *_resto):
+        sentencias.append(sentencia)
+
+    cliente.put(
+        f"/eventos/{evento['id']}",
+        json=cuerpo(iglesia_id=mundo["cuarta"].id) | {"titulo": "Otro"},
+        headers=cabecera(mundo, "pastor4"),
+    )
+    cliente.post(f"/eventos/{evento['id']}/cancelar", headers=cabecera(mundo, "pastor4"))
+    bloqueadas = [s for s in sentencias if "FOR UPDATE" in s and "eventos" in s]
+    assert len(bloqueadas) == 2

@@ -1,5 +1,9 @@
 """Reglas de eventos (Issue #32, decisiones D9 y D20).
 
+shortcut: la carga del usuario y las reglas de cargo (`usuario_actual`, `_puede_administrar`,
+`_puede_ver`) viven aquí hasta que se fusione `permisos.py` del PR 56; entonces pasan a una
+dependencia compartida en app/seguridad/ para que comunicados, ingresos y gastos no la copien.
+
 - Presbítero: ve, crea, edita y cancela eventos de cualquier iglesia o de todo el Presbiterio.
 - Pastor y apoyo del pastor: solo los de SU iglesia (no los de todo el Presbiterio).
 - Los demás cargos: solo ven los de su iglesia y los de todo el Presbiterio.
@@ -89,12 +93,16 @@ def _salida(evento: Evento, iglesia_nombre: str | None) -> EventoSalida:
 def _nombre_iglesia(sesion: Session, iglesia_id: int | None) -> str | None:
     if iglesia_id is None:
         return None
-    return sesion.scalar(select(Iglesia.nombre).where(Iglesia.id == iglesia_id))
+    iglesia = sesion.get(Iglesia, iglesia_id)  # sin consulta si ya se cargó al validar el destino
+    return iglesia.nombre if iglesia else None
 
 
-def _cargar(sesion: Session, usuario: Usuario, evento_id: int) -> Evento:
-    """El evento, o 404 si no existe o la persona no lo puede ver (no se revela cuál)."""
-    evento = sesion.get(Evento, evento_id)
+def _cargar(sesion: Session, usuario: Usuario, evento_id: int, bloquear: bool = False) -> Evento:
+    """El evento, o 404 si no existe o la persona no lo puede ver (no se revela cuál).
+
+    `bloquear` toma el candado de la fila hasta confirmar: editar y cancelar no se pisan.
+    """
+    evento = sesion.get(Evento, evento_id, with_for_update=bloquear)
     if evento is None or not _puede_ver(usuario, evento):
         raise _no_existe()
     return evento
@@ -132,35 +140,70 @@ def obtener(sesion: Session, usuario: Usuario, evento_id: int) -> EventoSalida:
     return _salida(evento, _nombre_iglesia(sesion, evento.iglesia_id))
 
 
+def _confirmar(sesion: Session, evento: Evento) -> EventoSalida:
+    """Arma la respuesta ANTES de confirmar: así no hay que releer el evento expirado."""
+    sesion.flush()
+    salida = _salida(evento, _nombre_iglesia(sesion, evento.iglesia_id))
+    sesion.commit()
+    return salida
+
+
+def _hay_duplicado(sesion: Session, datos: EventoEntrada) -> bool:
+    # shortcut: sin índice único, dos envíos exactamente simultáneos podrían colarse;
+    # impedirlo del todo exige una migración (perfil Datos/QA).
+    destino = (
+        Evento.iglesia_id.is_(None)
+        if datos.iglesia_id is None
+        else Evento.iglesia_id == datos.iglesia_id
+    )
+    return (
+        sesion.scalar(
+            select(Evento.id)
+            .where(
+                Evento.titulo == datos.titulo,
+                Evento.fecha == datos.fecha,
+                Evento.hora == datos.hora,
+                Evento.cancelado_en.is_(None),
+                destino,
+            )
+            .limit(1)
+        )
+        is not None
+    )
+
+
 def crear(sesion: Session, usuario: Usuario, datos: EventoEntrada) -> EventoSalida:
     if datos.fecha < hoy_en_merida():
         raise HTTPException(422, "La fecha no puede ser anterior a hoy.")
     _validar_destino(sesion, usuario, datos.iglesia_id)
+    if _hay_duplicado(sesion, datos):
+        raise HTTPException(status.HTTP_409_CONFLICT, "Ya existe un evento igual.")
     evento = Evento(**datos.model_dump(), creado_por=usuario.id)
     sesion.add(evento)
-    sesion.commit()
-    return _salida(evento, _nombre_iglesia(sesion, evento.iglesia_id))
+    return _confirmar(sesion, evento)
 
 
 def editar(sesion: Session, usuario: Usuario, evento_id: int, datos: EventoEntrada) -> EventoSalida:
-    evento = _cargar(sesion, usuario, evento_id)
+    evento = _cargar(sesion, usuario, evento_id, bloquear=True)
     if not _puede_administrar(usuario, evento.iglesia_id):
         raise _sin_permiso()
     if evento.cancelado_en is not None:
         raise HTTPException(status.HTTP_409_CONFLICT, "El evento está cancelado y no se edita.")
+    # Mover un evento al pasado lo sacaría de la lista como si se hubiera borrado; corregir
+    # otros datos de un evento que ya pasó (misma fecha) sí se permite.
+    if datos.fecha != evento.fecha and datos.fecha < hoy_en_merida():
+        raise HTTPException(422, "La fecha no puede ser anterior a hoy.")
     _validar_destino(sesion, usuario, datos.iglesia_id)
     for campo, valor in datos.model_dump().items():
         setattr(evento, campo, valor)
-    sesion.commit()
-    return _salida(evento, _nombre_iglesia(sesion, evento.iglesia_id))
+    return _confirmar(sesion, evento)
 
 
 def cancelar(sesion: Session, usuario: Usuario, evento_id: int) -> EventoSalida:
-    evento = _cargar(sesion, usuario, evento_id)
+    evento = _cargar(sesion, usuario, evento_id, bloquear=True)
     if not _puede_administrar(usuario, evento.iglesia_id):
         raise _sin_permiso()
     if evento.cancelado_en is not None:
         raise HTTPException(status.HTTP_409_CONFLICT, "El evento ya estaba cancelado.")
     evento.cancelado_en = datetime.now(UTC)
-    sesion.commit()
-    return _salida(evento, _nombre_iglesia(sesion, evento.iglesia_id))
+    return _confirmar(sesion, evento)
