@@ -11,7 +11,7 @@ Todo corre en **una sola computadora** (la de Jessica, que ya tiene PostgreSQL 1
 
 ### Antes: una sola vez
 
-1. **PostgreSQL local** funcionando y una base vacía para la demo (en `psql` o pgAdmin): `CREATE DATABASE iglesias_demo;`
+1. **Python 3.12** (las pruebas del equipo son con esa versión) y **PostgreSQL local** funcionando y una base vacía para la demo (en `psql` o pgAdmin): `CREATE DATABASE iglesias_demo;`
 2. **Backend** (desde la carpeta `backend`):
 
    ```powershell
@@ -22,33 +22,35 @@ Todo corre en **una sola computadora** (la de Jessica, que ya tiene PostgreSQL 1
 
 3. **Frontend** (desde la carpeta `frontend`): `npm install`
 
-### Cada vez que se enciende la demo
+### Para encender la demo (en este orden)
 
-**Terminal 1: la API** (desde `backend`, con el entorno virtual activado). Las variables solo viven en esa ventana; **no las escribas en ningún archivo del repositorio ni las pegues en el chat**:
+**Terminal 1: la API** (desde `backend`, con el entorno virtual activado). Las variables solo viven en esa ventana; **no las escribas en ningún archivo del repositorio ni las pegues en el chat**.
 
-```powershell
-$env:DATABASE_URL = "postgresql+psycopg://postgres:TU_CONTRASENA@localhost:5432/iglesias_demo"
-$env:SECRET_KEY = python -c "import secrets; print(secrets.token_urlsafe(48))"
-alembic upgrade head
-python -m uvicorn app.main:app --reload
-```
+1. Define la base y la clave de la API:
 
-**Terminal 2: la web** (desde `frontend`): `npm run dev` y abrir `http://localhost:5173` (en el celular, `http://IP-DE-LA-COMPUTADORA:5173` con la misma red wifi; en ese caso el CORS debe permitir ese origen).
+   ```powershell
+   $env:DATABASE_URL = "postgresql+psycopg://postgres:TU_CONTRASENA@localhost:5432/iglesias_demo"
+   $env:SECRET_KEY = python -c "import secrets; print(secrets.token_urlsafe(48))"
+   ```
 
-### Datos de ejemplo (la primera vez, o con una base nueva)
+2. Crea las tablas: `alembic upgrade head`
 
-En la **Terminal 1**, antes de arrancar la API, elige **seis contraseñas de al menos 12 caracteres** (una por cuenta) y cárgalas; el script solo guarda su hash y nunca las imprime:
+3. **Solo la primera vez (o con una base nueva): carga los datos de ejemplo.** Elige **seis contraseñas de al menos 12 caracteres** (una por cuenta); el script solo guarda su hash y nunca las imprime:
 
-```powershell
-$env:EJEMPLO_CLAVE_PRESBITERO = "..."
-$env:EJEMPLO_CLAVE_PASTOR = "..."
-$env:EJEMPLO_CLAVE_APOYO = "..."
-$env:EJEMPLO_CLAVE_TESORERO = "..."
-$env:EJEMPLO_CLAVE_LIDER_CELULA = "..."
-$env:EJEMPLO_CLAVE_UJIER = "..."
-python -m scripts.cargar_datos_ejemplo              # solo muestra el destino
-python -m scripts.cargar_datos_ejemplo --confirmar  # carga los datos
-```
+   ```powershell
+   $env:EJEMPLO_CLAVE_PRESBITERIO = "..."
+   $env:EJEMPLO_CLAVE_PASTOR = "..."
+   $env:EJEMPLO_CLAVE_APOYO = "..."
+   $env:EJEMPLO_CLAVE_TESORERO = "..."
+   $env:EJEMPLO_CLAVE_LIDER_CELULA = "..."
+   $env:EJEMPLO_CLAVE_UJIER = "..."
+   python -m scripts.cargar_datos_ejemplo              # solo muestra el destino
+   python -m scripts.cargar_datos_ejemplo --confirmar  # carga los datos
+   ```
+
+4. Arranca la API: `python -m uvicorn app.main:app --reload`
+
+**Terminal 2: la web** (desde `frontend`): `npm run dev` y abrir `http://localhost:5173`. Para verla en el celular, con la misma red wifi, abre `http://IP-DE-LA-COMPUTADORA:5173`; en ese caso hay que arrancar la API (paso 4) con `$env:CORS_ORIGINS = "http://IP-DE-LA-COMPUTADORA:5173"`.
 
 Cuentas que se crean (el usuario es público; **las contraseñas las sabes solo tú**):
 
@@ -61,18 +63,20 @@ Cuentas que se crean (el usuario es público; **las contraseñas las sabes solo 
 | Líder de célula | `lider.celula.ejemplo` |
 | Ujier | `ujier.ejemplo` |
 
-El script es repetible (no duplica) y solo corre contra una base de **esta misma computadora**. **No carga** direcciones, enlaces de Google Maps, horarios, redes ni teléfonos: aún no los tenemos y no se inventan. Horarios que ya conocemos (sin cargar todavía): 3ra Madero, domingos 17:30; 3ra Kanasín, domingos 11:30; 6ta, 18:00. La 4ta y Huhí: no se conocen.
+El script es repetible (no duplica) y solo corre contra una base de **esta misma computadora**. Carga 4 iglesias, 22 miembros, 6 grupos, 6 cuentas, 27 ingresos y 12 gastos de ejemplo. **No carga** direcciones, enlaces de Google Maps, horarios, redes ni teléfonos (aún no los tenemos y no se inventan), **ni eventos ni comunicados**: salen vacíos. Horarios que ya conocemos (sin cargar todavía): 3ra Madero, domingos 17:30; 3ra Kanasín, domingos 11:30; 6ta, 18:00. La 4ta y Huhí: no se conocen.
 
 ### Qué esperar en pantalla (5 nov)
 
 | Parte | Estado |
 |---|---|
-| Inicio de sesión y cuentas por cargo | Funciona |
-| Usuarios, miembros, grupos y asistencia | Funcionan |
-| Eventos y comunicados | La API funciona, pero **su formulario necesita `GET /iglesias`** (#12) para elegir la iglesia |
-| Iglesias, horarios | Sin API todavía (#12, #14): las pantallas dirán "No se pudo conectar" |
-| Ingresos, gastos y reporte financiero | Sin API todavía (#25, #27, #29) |
-| La web llamando a la API | **Necesita CORS (#75)**. Sin él, el navegador bloquea las peticiones |
+| Inicio de sesión con las 6 cuentas y los permisos del servidor | Funciona |
+| Listas de usuarios, miembros, grupos y asistencia | Funcionan |
+| **Formularios de crear** (usuarios, miembros, grupos, eventos y comunicados) | **No abren**: necesitan `GET /iglesias` (#12, ver Issue #82) |
+| Eventos y comunicados | Salen **vacíos** (los datos de ejemplo no incluyen ninguno) y no se pueden crear hasta que exista #12 |
+| Iglesias y horarios | Sin API todavía (#12, #14) |
+| Ingresos, gastos y reporte financiero | Sin API todavía (#25, #27, #29). Hoy un error 404 se muestra como "este registro ya no existe" (Issue #83) |
+| El Inicio | Muestra todos los módulos a todos los cargos, aunque no puedan usarlos (Issue #84) |
+| La web llamando a la API | Con CORS (PR #79) y la API encendida, funciona |
 
 Si una pantalla dice "No se pudo conectar", salta a otra parte de la demo y di con claridad que esa API aún no está lista. **No inventes datos delante de la clienta.**
 
