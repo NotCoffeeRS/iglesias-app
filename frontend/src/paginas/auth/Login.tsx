@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { haySesion, iniciarSesion } from '../../api/auth'
 import { ErrorApi } from '../../api/cliente'
+import Logo from '../../componentes/Logo'
 
 function mensajeDeError(error: unknown): string {
   if (error instanceof ErrorApi) {
@@ -45,13 +46,10 @@ export default function Login() {
     <main className="flex min-h-dvh items-center justify-center bg-fondo px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-8">
-          <h1
-            className="text-5xl font-extrabold tracking-tight text-primario"
-            style={{ fontStretch: '85%' }}
-          >
-            Tessia
+          <h1>
+            <Logo tipo="completo" alt="Tessia" className="mx-auto h-44 w-auto sm:h-52" />
           </h1>
-          <p className="mt-1 text-texto-suave">Presbiterio de la 3ra IAFCJ</p>
+          <p className="mt-1 text-center text-texto-suave">Presbiterio de la 3ra IAFCJ</p>
         </div>
 
         <form

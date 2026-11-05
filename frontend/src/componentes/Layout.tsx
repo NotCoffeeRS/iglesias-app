@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import CuentaMenu from './CuentaMenu'
 import Icono from './Icono'
+import Logo from './Logo'
 import { SECCIONES_MENU, type EntradaMenu } from './tipos'
 import { useMenuVisible } from './useMenuVisible'
 
@@ -20,9 +21,12 @@ function clasesEnlace({ isActive }: { isActive: boolean }) {
 
 function Marca() {
   return (
-    <Link to="/" className="block leading-tight">
-      <span className="font-titulo text-xl font-bold tracking-tight text-primario">Tessia</span>
-      <span className="block text-sm text-texto-suave">Presbiterio de la 3ra IAFCJ</span>
+    <Link to="/" className="flex items-center gap-3 leading-tight">
+      <Logo tipo="simbolo" className="h-10 w-auto shrink-0" />
+      <span>
+        <Logo tipo="letras" alt="Tessia" className="h-6 w-auto" />
+        <span className="block text-sm text-texto-suave">Presbiterio de la 3ra IAFCJ</span>
+      </span>
     </Link>
   )
 }
