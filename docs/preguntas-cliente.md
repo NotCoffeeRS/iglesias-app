@@ -114,3 +114,17 @@ No se piden ni se anotan datos reales de personas: para las pruebas usamos nombr
 - Ingresos: diezmos, ofrendas, EVAMI (evangelismo misionero), talento (venta de comida) y otras donaciones con descripción. Solo se manejan cantidades (ej.: lo recaudado el culto del domingo 1 de septiembre, y una petición para la operación de una hermana).
 - Gastos: luz, agua, renta, mantenimiento, material de construcción, materiales (limpieza, reposición de algo que se rompa), apoyo a miembros, etc. Sí hay autorización: tesorería en sujeción al pastor local.
 
+### 5 nov 2026 — tercera tanda
+
+- **Apoyo del pastor y dinero:** quiere que el pastor tenga un botón para dar acceso al dinero a cualquier cargo; por defecto solo lo ven el pastor y el tesorero.
+- **Horarios:** 3ra Madero, domingos 5:30 pm; 3ra Kanasín, domingos 11:30 am; 6ta, 6 pm; 4ta y Huhí, no sabe.
+- **Dos cargos:** sí, una persona puede tener dos.
+- **Asistencia:** todos los grupos la toman; la registra el líder o maestro, hoy en listas físicas. Registrar visitas y niños estaría bien empezar.
+- **Células:** tienen sus propios miembros y reportes (asistencia y ofrenda); reportan al pastor local. Mandará la foto del reporte. Una célula por miembro como ideal; podría asistir a varias.
+- **Eventos:** por iglesia local, salvo congresos (distritales). Tipos del proceso de discipulado más presentación de niños, bodas, XV años, graduación IBID y congresos. Cuota según cada iglesia; congresos con costo. Recordatorios dentro de la app.
+- **Ingresos:** efectivo, lo cuenta el tesorero; rendición y recibo según el pastor local. El pastor local corrige montos sin autorización.
+- **Gastos:** guardar comprobantes con foto adjunta. Presupuesto según cada iglesia. Áreas como la tiendita llevan sus cuentas aparte, con posible inversión desde las ofrendas o el pastor.
+- **Comunicados:** por iglesia local, los publica multimedia o el pastor o alguien de confianza; visibles para siempre o al menos un año; también por WhatsApp.
+- **Imagen:** logo de la IAFCJ. No hay internet estable en todas las iglesias.
+- No entendió la pregunta de las palabras propias de la app (35); no pidió dato de envío a la 3ra o fondo (21), que prefirió no preguntar.
+
