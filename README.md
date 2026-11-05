@@ -24,7 +24,7 @@ Proyecto escolar hecho con el método **Scrum** por un equipo de cuatro personas
 
 Lo que **no** está terminado, dicho con claridad:
 
-- **Reportes:** el reporte financiero por iglesia y consolidado, y el de asistencia (su pantalla del reporte financiero existe, la API no).
+- **Reporte de célula:** falta el formato que la clienta usa hoy en sus listas físicas (decisión D34). El reporte financiero y el de asistencia ya están.
 - **Dinero para otros cargos:** un botón para que el pastor dé acceso a las finanzas a otros cargos (decisión D22).
 - **Dos cargos por persona** (hoy cada usuario tiene uno).
 - **Foto del comprobante** en los gastos.
