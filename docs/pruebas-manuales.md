@@ -5,7 +5,7 @@ Lista de pruebas manuales y recorrido en el navegador para la entrega (Issue #35
 > **Cómo leer este documento.** Cada fila separa dos cosas que no deben mezclarse:
 >
 > - **Esperado según el código:** lo que se deduce de **leer el código** (menús, permisos, respuestas del servidor). **No es un resultado de prueba.**
-> - **Resultado en el navegador:** lo que **Jessica vio** en su recorrido del 5 nov 2026. Lo que no se probó dice **"sin probar"**, y lo que no se pudo precisar dice **"POR CONFIRMAR"**.
+> - **Resultado en el navegador:** lo que **Jessica vio** en su recorrido del 5 nov 2026, hecho en dos tandas (ver la sección 1). Lo que no se probó dice **"sin probar"**, y lo que no se pudo precisar dice **"POR CONFIRMAR"**.
 >
 > No se afirma ningún resultado que no haya sido observado. Las contraseñas de las cuentas **no están en este documento ni en el repositorio**.
 
@@ -15,7 +15,8 @@ Lista de pruebas manuales y recorrido en el navegador para la entrega (Issue #35
 |---|---|
 | Fecha del recorrido | 5 nov 2026 |
 | Quién probó | Jessica (en el navegador, en su computadora) |
-| Código | Rama `main`. La API se arrancó con el código de `main` en el commit **`b3bf76c`**. Después `main` solo avanzó con documentación (`23c1c7d` y `5e6a14f`): el backend y el frontend son los mismos |
+| Código, 1ª tanda | Rama `main`. La API se arrancó con el código de `main` en el commit **`b3bf76c`**. Después `main` solo avanzó con documentación (`23c1c7d` y `5e6a14f`): el backend y el frontend son los mismos |
+| Código, 2ª tanda | Jessica hizo `git pull` de `5e6a14f` a **`c8793b9`** (el historial local del clon lo confirma), reinició a mano la API y la web y probó otra vez con las 6 cuentas. Este código ya trae el menú agrupado, "Mi cuenta" y los reportes financiero y de asistencia. Los resultados de la 2ª tanda están en la sección 3.8 |
 | Base de datos | **`iglesias_demo`** en PostgreSQL 17 local, migraciones aplicadas hasta `0002` |
 | API | `uvicorn` **sin** `--reload`, puerto 8000 |
 | Web | `npm run dev`, puerto 5173 (`http://localhost:5173`) |
@@ -43,7 +44,7 @@ El Issue pide: **login, iglesia, miembro, ingreso, gasto y reporte**.
 | Miembro | **Parcial** | El formulario `/miembros/nuevo` abre con el tesorero y con el líder de célula (no se guardó nada). Registrar y consultar la lista de miembros: **sin probar** |
 | Ingreso | **Parcial** | Se consultan con el tesorero, con el presbítero y con una cuenta que fue el pastor o el tesorero (POR CONFIRMAR; ver la sección 3). Registrar y anular: **sin probar** |
 | Gasto | **Parcial** | Igual que ingresos: se consultan; registrar y anular: **sin probar** |
-| Reporte | **Pendiente** | El reporte financiero (#29) todavía no existe. Ver la sección 6 |
+| Reporte | **Parcial** | En la 1ª tanda el reporte financiero (#29) todavía no existía. En la 2ª (`c8793b9`) se **vio** el reporte financiero con presbítero, pastor y tesorero, y el de asistencia con el pastor y el ujier. Los totales y el detalle por cuenta: **POR CONFIRMAR** (ver la sección 3.8) |
 
 ## 3. Matriz cuenta × módulo
 
