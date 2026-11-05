@@ -19,6 +19,7 @@ _MENSAJES = {
     "fecha": "Escribe una fecha válida.",
     "hora": "Escribe una hora válida, sin zona horaria, como 19:30.",
     "lugar": "El lugar admite hasta 200 letras.",
+    "descripcion": "La descripción admite hasta 5000 letras.",
 }
 
 
@@ -32,7 +33,7 @@ class EventoEntrada(BaseModel):
     hora: time
     iglesia_id: int | None = None
     lugar: str | None = Field(default=None, max_length=200)
-    descripcion: str | None = None
+    descripcion: str | None = Field(default=None, max_length=5000)
 
     @field_validator("hora")
     @classmethod
@@ -49,7 +50,7 @@ class EventoEntrada(BaseModel):
 
     # Va al final para envolver a los demás: el cliente muestra estos textos tal cual, así que
     # los errores de formato, vacío y largo salen en español y no como los de Pydantic.
-    @field_validator("titulo", "fecha", "hora", "lugar", mode="wrap")
+    @field_validator("titulo", "fecha", "hora", "lugar", "descripcion", mode="wrap")
     @classmethod
     def mensaje_en_espanol(
         cls, valor: Any, manejador: ValidatorFunctionWrapHandler, info: ValidationInfo

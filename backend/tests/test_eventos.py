@@ -540,3 +540,37 @@ def test_editar_y_cancelar_toman_el_candado_de_la_fila(cliente, mundo, sesion):
     cliente.post(f"/eventos/{evento['id']}/cancelar", headers=cabecera(mundo, "pastor4"))
     bloqueadas = [s for s in sentencias if "FOR UPDATE" in s and "eventos" in s]
     assert len(bloqueadas) == 2
+
+
+def test_editar_no_deja_un_evento_igual_a_otro(cliente, mundo):
+    crear_evento(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+    otro = crear_evento(
+        cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id, titulo="Otro retiro"
+    )
+    igual = cuerpo(iglesia_id=mundo["cuarta"].id)
+    respuesta = cliente.put(
+        f"/eventos/{otro['id']}", json=igual, headers=cabecera(mundo, "pastor4")
+    )
+    assert respuesta.status_code == 409
+
+
+def test_guardar_un_evento_sin_cambios_no_cuenta_como_duplicado(cliente, mundo):
+    evento = crear_evento(cliente, mundo, "pastor4", iglesia_id=mundo["cuarta"].id)
+    respuesta = cliente.put(
+        f"/eventos/{evento['id']}",
+        json=cuerpo(iglesia_id=mundo["cuarta"].id),
+        headers=cabecera(mundo, "pastor4"),
+    )
+    assert respuesta.status_code == 200
+
+
+def test_la_descripcion_tiene_largo_maximo_y_el_error_sale_en_espanol(cliente, mundo):
+    respuesta = cliente.post(
+        "/eventos",
+        json=cuerpo() | {"descripcion": "x" * 5001},
+        headers=cabecera(mundo, "presbitero"),
+    )
+    assert respuesta.status_code == 422
+    assert [e["msg"] for e in respuesta.json()["detail"]] == [
+        "La descripción admite hasta 5000 letras."
+    ]

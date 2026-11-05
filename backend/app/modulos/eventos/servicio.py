@@ -148,7 +148,7 @@ def _confirmar(sesion: Session, evento: Evento) -> EventoSalida:
     return salida
 
 
-def _hay_duplicado(sesion: Session, datos: EventoEntrada) -> bool:
+def _hay_duplicado(sesion: Session, datos: EventoEntrada, excepto_id: int | None = None) -> bool:
     # shortcut: sin índice único, dos envíos exactamente simultáneos podrían colarse;
     # impedirlo del todo exige una migración (perfil Datos/QA).
     destino = (
@@ -164,6 +164,7 @@ def _hay_duplicado(sesion: Session, datos: EventoEntrada) -> bool:
                 Evento.fecha == datos.fecha,
                 Evento.hora == datos.hora,
                 Evento.cancelado_en.is_(None),
+                Evento.id != excepto_id if excepto_id is not None else True,
                 destino,
             )
             .limit(1)
@@ -194,6 +195,8 @@ def editar(sesion: Session, usuario: Usuario, evento_id: int, datos: EventoEntra
     if datos.fecha != evento.fecha and datos.fecha < hoy_en_merida():
         raise HTTPException(422, "La fecha no puede ser anterior a hoy.")
     _validar_destino(sesion, usuario, datos.iglesia_id)
+    if _hay_duplicado(sesion, datos, evento.id):
+        raise HTTPException(status.HTTP_409_CONFLICT, "Ya existe un evento igual.")
     for campo, valor in datos.model_dump().items():
         setattr(evento, campo, valor)
     return _confirmar(sesion, evento)
