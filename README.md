@@ -1,6 +1,6 @@
-# Iglesias App
+# Tessia
 
-Aplicación **web** (pensada para el celular) para el **Presbiterio de la 3ra IAFCJ**: cuatro iglesias de Mérida y Huhí, Yucatán (la 3ra de Mérida con dos sedes, Madero y Kanasín) que rinden cuentas al pastor Jorge Lozano, presbítero.
+**Tessia** es una aplicación **web** (pensada para el celular) para el **Presbiterio de la 3ra IAFCJ**: cuatro iglesias de Mérida y Huhí, Yucatán (la 3ra de Mérida con dos sedes, Madero y Kanasín) que rinden cuentas al pastor Jorge Lozano, presbítero.
 Permite llevar los horarios y ubicaciones de cada iglesia, los miembros, la asistencia, los eventos, los grupos, los comunicados y las finanzas (ingresos y gastos), con usuarios y permisos por cargo.
 
 Proyecto escolar hecho con el método **Scrum** por un equipo de cuatro personas, con apoyo de agentes de IA (Claude Code y Codex) y un orquestador. Estado al **5 de noviembre de 2026**.

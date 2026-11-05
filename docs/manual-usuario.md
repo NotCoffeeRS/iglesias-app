@@ -1,6 +1,6 @@
-# Manual de usuario — Iglesias App
+# Manual de usuario — Tessia
 
-Aplicación web del Presbiterio de la 3ra IAFCJ. Se usa sobre todo desde el celular, y también desde la computadora.
+Tessia es la aplicación web del Presbiterio de la 3ra IAFCJ. Se usa sobre todo desde el celular, y también desde la computadora.
 Este manual es corto: primero lo básico, después lo que hace cada cargo y, al final, cómo se hace cada tarea.
 
 > **Estado de este documento (3 nov 2026).** Describe las pantallas ya construidas. Todavía **no** están: niños y adolescentes,
@@ -10,10 +10,12 @@ Este manual es corto: primero lo básico, después lo que hace cada cargo y, al 
 
 ## 1. Lo básico
 
-- **Entrar.** Abre la dirección de la app, escribe tu **usuario** y tu **contraseña** y toca **Entrar**. Tu pastor o su apoyo te da la cuenta.
+- **Entrar.** Abre la dirección de la app, escribe tu **usuario** y tu **contraseña** y toca **Entrar**. Si te equivocas al escribir la contraseña, toca el ojo a la derecha del campo para verla. Tu pastor o su apoyo te da la cuenta.
 - **Menú.** En el celular, toca el icono de las tres rayas (arriba a la izquierda). En la computadora, el menú está a la izquierda.
+  Está agrupado en **Iglesia**, **Personas** y **Dinero**: toca el título de una sección para abrirla o cerrarla (se abre sola la de la pantalla donde estás).
   Solo debes usar lo que te toca: si entras a algo que tu cargo no puede ver, la app te lo dice y no muestra nada.
-- **Cerrar sesión.** Al final del menú. Hazlo siempre si usas un celular que no es tuyo.
+- **Mi cuenta y cerrar sesión.** Al pie del menú ves con qué cuenta estás (tu nombre, tu cargo y tu iglesia); tócalo para abrir **Mi perfil**.
+  Debajo está **Cerrar sesión**, en rojo: la app te pregunta «¿Cerrar sesión?» antes de cerrar. Hazlo siempre si usas un celular que no es tuyo.
 - **Si la sesión se vence**, la app te regresa a la pantalla de entrada; vuelve a entrar.
 - **Sin cuenta** puedes ver los horarios y cómo llegar a cada iglesia en la dirección `/ubicaciones`. Es lo único público.
 - **Modo oscuro.** La app se pone oscura sola si tu celular está en modo oscuro.
