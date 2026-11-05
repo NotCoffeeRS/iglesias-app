@@ -3,8 +3,9 @@
 Tessia es la aplicación web del Presbiterio de la 3ra IAFCJ. Se usa sobre todo desde el celular, y también desde la computadora.
 Este manual es corto: primero lo básico, después lo que hace cada cargo y, al final, cómo se hace cada tarea.
 
-> **Estado de este documento (3 nov 2026).** Describe las pantallas ya construidas. Todavía **no** están: niños y adolescentes,
-> asignar miembros a las células, eventos, comunicados y el reporte de asistencia; por eso no aparecen aquí.
+> **Estado de este documento (5 nov 2026).** Describe las pantallas ya construidas, incluidas niños y adolescentes, las
+> asignaciones a grupos, los eventos, los comunicados y el reporte de asistencia. Todavía **no** está el reporte de célula (la clienta
+> aún no manda el formato; ver `docs/DECISIONES.md`) ni el modo sin conexión.
 > Lo marcado como *(provisional)* es una regla que la clienta aún no confirma (ver `docs/DECISIONES.md`).
 > Los ejemplos usan nombres inventados: en este manual no hay datos reales de personas ni de dinero.
 
@@ -161,6 +162,42 @@ El dinero (ingresos, gastos y reporte) lo ven **solo** el pastor y el tesorero d
 1. Menú → **Grupos** → **Crear grupo**.
 2. Elige el **tipo**, escribe el nombre y elige la iglesia.
 3. Elige al **líder** y, si quieres, al **asistente o segundo** entre los miembros de esa iglesia.
+
+### Registrar a un niño o adolescente
+
+1. Menú → **Personas** → **Niños y adolescentes** → **Registrar menor**.
+2. En **Datos del menor** escribe el nombre completo, elige la iglesia, la fecha de nacimiento y el sexo, y agrega la dirección si la tienes.
+   Solo se registran de **4 a 17 años cumplidos**. La categoría (niño o niña de 4 a 11 años, adolescente de 12 a 17) la calcula la app: no se escribe.
+3. En **Tutores** captura al menos un tutor. Toca **Agregar tutor** para otro; **Quitar tutor** (en rojo) quita el que sobra.
+4. Toca **Guardar registro**. En la lista puedes buscar por nombre.
+
+### Asignar un miembro a un grupo o quitarlo
+
+1. Menú → **Personas** → **Asignaciones a grupos**.
+2. Elige el grupo. Verás sus integrantes.
+3. Para agregar: elige un miembro en **Elige un miembro** y toca **Agregar al grupo**.
+4. Para quitar: toca **Quitar** (en rojo) junto a la persona y confirma con **Sí, quitar**. Su ficha de miembro se conserva; solo sale del grupo.
+
+### Ver el reporte de asistencia (según tu cargo)
+
+1. Menú → **Personas** → **Reporte de asistencia**.
+2. Elige **Desde**, **Hasta**, la **Iglesia** (o «Todas en mi alcance») y el **Servicio** (o «Todos los servicios») y toca **Consultar reporte**.
+3. Verás los totales de **registros**, **asistencias** y **faltas**, y debajo el detalle por iglesia, fecha y servicio. No muestra nombres de personas.
+4. Cada cargo ve lo suyo: el pastor y el apoyo, su iglesia; el presbítero, todas; el líder de célula, su célula; el ujier, a quienes no tienen célula. El tesorero no entra.
+5. Los números son **marcas guardadas**, no personas distintas: una persona cuenta una vez por cada fecha y servicio.
+
+### Crear o cancelar un evento (presbítero, pastor y apoyo)
+
+1. Menú → **Iglesia** → **Eventos** → **Nuevo evento**.
+2. Escribe el **título**, la **fecha** (de hoy en adelante) y la **hora**, y elige la **iglesia**. «Todo el Presbiterio» solo lo puede elegir el presbítero. El lugar y la descripción son opcionales.
+3. Toca **Crear evento**. Con **Editar** cambias sus datos.
+4. Para cancelar: **Cancelar evento** (en rojo) y confirma con **Sí, cancelar el evento**. Un evento no se borra: queda tachado y marcado como **Cancelado**.
+
+### Publicar un comunicado (presbítero, pastor y apoyo)
+
+1. Menú → **Iglesia** → **Comunicados** → **Nuevo comunicado**.
+2. Escribe el **título** y el **contenido**, elige hasta cuándo está **vigente** y para quién es (**Para**: una iglesia o, solo el presbítero, todo el Presbiterio).
+3. Toca **Publicar**. La lista solo muestra los comunicados vigentes; con **Editar** puedes cambiarlos. Uno que ya venció no se edita.
 
 ### Cambiar los horarios de una sede
 
