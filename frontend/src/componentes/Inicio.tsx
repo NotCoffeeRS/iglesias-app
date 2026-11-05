@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import type { EntradaMenu } from './tipos'
+import { SECCIONES_MENU, type EntradaMenu } from './tipos'
 import { useMenuVisible } from './useMenuVisible'
 
 function fechaDeHoy(): string {
@@ -31,38 +31,36 @@ export default function Inicio({ menu }: { menu: EntradaMenu[] }) {
           conforme se vayan agregando.
         </p>
       ) : (
-        <ul className="mt-6 grid auto-rows-[minmax(8.5rem,auto)] grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-          {accesos.map((acceso, i) => (
-            <li key={acceso.ruta} className={i === 0 ? 'col-span-2 md:row-span-2' : ''}>
-              <Link
-                to={acceso.ruta}
-                className={[
-                  'flex h-full flex-col justify-end rounded-3xl p-5 transition-colors',
-                  i === 0
-                    ? 'bg-primario text-sobre-primario hover:bg-primario-hover'
-                    : 'border border-borde bg-superficie hover:bg-superficie-2',
-                ].join(' ')}
-              >
-                <span
-                  className={
-                    i === 0
-                      ? 'font-titulo text-3xl font-bold'
-                      : 'font-titulo text-xl font-semibold text-primario'
-                  }
-                >
-                  {acceso.etiqueta}
-                </span>
-                <span
-                  className={
-                    i === 0 ? 'mt-1 opacity-85' : 'mt-1 text-sm leading-snug text-texto-suave'
-                  }
-                >
-                  {acceso.descripcion}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <>
+          {SECCIONES_MENU.map(({ clave, titulo }) => {
+            const delGrupo = accesos.filter((e) => e.seccion === clave)
+            if (delGrupo.length === 0) return null
+            return (
+              <div key={clave} className="mt-7">
+                <h2 className="text-sm font-semibold tracking-wide text-texto-suave uppercase">
+                  {titulo}
+                </h2>
+                <ul className="mt-3 grid auto-rows-[minmax(7.5rem,auto)] grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+                  {delGrupo.map((acceso) => (
+                    <li key={acceso.ruta}>
+                      <Link
+                        to={acceso.ruta}
+                        className="flex h-full flex-col justify-end rounded-3xl border border-borde bg-superficie p-5 transition-colors hover:bg-superficie-2"
+                      >
+                        <span className="font-titulo text-xl font-semibold text-primario">
+                          {acceso.etiqueta}
+                        </span>
+                        <span className="mt-1 text-sm leading-snug text-texto-suave">
+                          {acceso.descripcion}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })}
+        </>
       )}
     </section>
   )

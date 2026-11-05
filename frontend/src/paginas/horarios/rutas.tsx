@@ -8,6 +8,7 @@ export const menu: ModuloRutas['menu'] = [
     ruta: '/horarios',
     etiqueta: 'Horarios',
     orden: 15,
+    seccion: 'iglesia',
     descripcion: 'Cultos, oración, jóvenes y más por sede',
   },
 ]

@@ -11,6 +11,7 @@ export const menu: ModuloRutas['menu'] = [
     ruta: '/reporte-financiero',
     etiqueta: 'Reporte financiero',
     orden: 50,
+    seccion: 'dinero',
     cargos: CARGOS_CON_DINERO,
     descripcion: 'Ingresos, gastos y balance por periodo',
   },

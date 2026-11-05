@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import type { EntradaMenu } from './tipos'
+import { SECCIONES_MENU, type EntradaMenu } from './tipos'
 import { useMenuVisible } from './useMenuVisible'
 
 interface Props {
@@ -91,11 +91,44 @@ export default function Layout({ menu: menuCompleto }: Props) {
           <NavLink to="/" end className={clasesEnlace} onClick={cerrar}>
             Inicio
           </NavLink>
-          {menu.map((entrada) => (
-            <NavLink key={entrada.ruta} to={entrada.ruta} className={clasesEnlace} onClick={cerrar}>
-              {entrada.etiqueta}
-            </NavLink>
-          ))}
+          {SECCIONES_MENU.map(({ clave, titulo }) => {
+            const entradas = menu.filter((e) => e.seccion === clave)
+            if (entradas.length === 0) return null
+            return (
+              <div
+                key={clave}
+                role="group"
+                aria-label={titulo}
+                className="mt-3 flex flex-col gap-1"
+              >
+                <p className="px-3.5 pb-0.5 text-xs font-semibold uppercase tracking-wide text-texto-suave">
+                  {titulo}
+                </p>
+                {entradas.map((entrada) => (
+                  <NavLink
+                    key={entrada.ruta}
+                    to={entrada.ruta}
+                    className={clasesEnlace}
+                    onClick={cerrar}
+                  >
+                    {entrada.etiqueta}
+                  </NavLink>
+                ))}
+              </div>
+            )
+          })}
+          {menu
+            .filter((e) => !e.seccion)
+            .map((entrada) => (
+              <NavLink
+                key={entrada.ruta}
+                to={entrada.ruta}
+                className={clasesEnlace}
+                onClick={cerrar}
+              >
+                {entrada.etiqueta}
+              </NavLink>
+            ))}
         </nav>
       </aside>
 

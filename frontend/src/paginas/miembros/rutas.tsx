@@ -14,6 +14,7 @@ export const menu: ModuloRutas['menu'] = [
     ruta: '/miembros',
     etiqueta: 'Miembros',
     orden: 20,
+    seccion: 'personas',
     cargos: CARGOS_CON_MIEMBROS_Y_GRUPOS,
     descripcion: 'Registro y estado de cada miembro',
   },
