@@ -15,6 +15,7 @@ export const menu: ModuloRutas['menu'] = [
     etiqueta: 'Miembros',
     orden: 20,
     seccion: 'personas',
+    icono: 'miembros',
     cargos: CARGOS_CON_MIEMBROS_Y_GRUPOS,
     descripcion: 'Registro y estado de cada miembro',
   },

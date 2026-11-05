@@ -14,6 +14,7 @@ export const menu: ModuloRutas['menu'] = [
     etiqueta: 'Ingresos',
     orden: 40,
     seccion: 'dinero',
+    icono: 'ingresos',
     cargos: CARGOS_CON_DINERO,
     descripcion: 'Diezmos, ofrendas y EVAMI por culto',
   },

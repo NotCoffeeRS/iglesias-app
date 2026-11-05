@@ -15,6 +15,7 @@ export const menu: ModuloRutas['menu'] = [
     etiqueta: 'Iglesias',
     orden: 10,
     seccion: 'iglesia',
+    icono: 'iglesia',
     descripcion: 'Ficha, sedes y redes de cada iglesia',
   },
 ]

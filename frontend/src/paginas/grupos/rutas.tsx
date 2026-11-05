@@ -15,6 +15,7 @@ export const menu: ModuloRutas['menu'] = [
     etiqueta: 'Grupos',
     orden: 25,
     seccion: 'personas',
+    icono: 'grupos',
     cargos: CARGOS_CON_MIEMBROS_Y_GRUPOS,
     descripcion: 'Redes, células y ministerios con su líder',
   },

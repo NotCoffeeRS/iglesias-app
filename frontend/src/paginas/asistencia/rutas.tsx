@@ -10,6 +10,7 @@ export const menu: ModuloRutas['menu'] = [
     etiqueta: 'Asistencia',
     orden: 5,
     seccion: 'personas',
+    icono: 'asistencia',
     cargos: CARGOS_QUE_MARCAN_ASISTENCIA,
     descripcion: 'Marca quién asistió al culto o quién faltó',
   },

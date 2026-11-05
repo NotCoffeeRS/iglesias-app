@@ -14,6 +14,7 @@ export const menu: ModuloRutas['menu'] = [
     etiqueta: 'Eventos',
     orden: 70,
     seccion: 'iglesia',
+    icono: 'eventos',
     descripcion: 'Retiros, bautizos y más',
   },
 ]
