@@ -22,6 +22,7 @@ export default function Login() {
 
   const [usuario, setUsuario] = useState('')
   const [contrasena, setContrasena] = useState('')
+  const [verContrasena, setVerContrasena] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
 
@@ -84,18 +85,45 @@ export default function Login() {
             />
           </label>
 
-          <label className="mt-4 block text-sm font-semibold text-texto">
-            Contraseña
-            <input
-              type="password"
-              name="contrasena"
-              autoComplete="current-password"
-              required
-              value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
-              className={claseCampo}
-            />
-          </label>
+          <div className="mt-4">
+            <label htmlFor="contrasena" className="block text-sm font-semibold text-texto">
+              Contraseña
+            </label>
+            <div className="relative">
+              <input
+                id="contrasena"
+                type={verContrasena ? 'text' : 'password'}
+                name="contrasena"
+                autoComplete="current-password"
+                required
+                value={contrasena}
+                onChange={(e) => setContrasena(e.target.value)}
+                className={claseCampo + ' pr-12'}
+              />
+              <button
+                type="button"
+                onClick={() => setVerContrasena((v) => !v)}
+                aria-label={verContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-pressed={verContrasena}
+                className="absolute inset-y-0 right-1 mt-1.5 grid w-11 place-items-center rounded-xl text-texto-suave transition-colors hover:text-texto focus:outline-none focus-visible:ring-2 focus-visible:ring-acento"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                  {verContrasena && <path d="M4 4l16 16" />}
+                </svg>
+              </button>
+            </div>
+          </div>
 
           <button
             type="submit"
