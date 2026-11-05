@@ -132,5 +132,5 @@ No se piden ni se anotan datos reales de personas: para las pruebas usamos nombr
 
 - **Huhí:** miércoles y sábados a las 6:00 pm; domingos a las 5:00 pm.
 - **4ta de Mérida:** cultos los domingos a las 5:00 pm.
-- Sigue pendiente el **día** de la 6ta (solo dijo 6 pm; ya había dicho que también tiene culto los miércoles).
+- **6ta:** el culto de las 6:00 pm es los **domingos**. Sigue pendiente la **hora** de su culto de los miércoles (ya había dicho que también lo tiene).
 
