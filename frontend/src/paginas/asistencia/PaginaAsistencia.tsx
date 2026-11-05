@@ -141,7 +141,7 @@ function Hoja({
                     ? asistencias
                       ? 'bg-acento/35'
                       : 'bg-peligro-fondo'
-                    : 'hover:bg-superficie-2',
+                    : 'hover:bg-resalte',
                 ].join(' ')}
               >
                 <span className={'min-w-0 flex-1 ' + (marcado ? 'font-semibold' : '')}>
@@ -159,14 +159,14 @@ function Hoja({
           <button
             type="button"
             onClick={() => marcarTodos(personas.map((p) => p.miembro_id))}
-            className="rounded-xl px-3 py-2 text-sm font-semibold text-enlace hover:bg-superficie-2"
+            className="rounded-xl px-3 py-2 text-sm font-semibold text-enlace hover:bg-resalte"
           >
             Marcar a todos
           </button>
           <button
             type="button"
             onClick={() => marcarTodos([])}
-            className="rounded-xl px-3 py-2 text-sm font-semibold text-texto-suave hover:bg-superficie-2"
+            className="rounded-xl px-3 py-2 text-sm font-semibold text-texto-suave hover:bg-resalte"
           >
             Quitar marcas
           </button>
@@ -323,7 +323,7 @@ export default function PaginaAsistencia() {
                   'flex-1 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors',
                   h.hoja === hoja?.hoja
                     ? 'bg-primario text-sobre-primario'
-                    : 'border border-borde bg-superficie hover:bg-superficie-2',
+                    : 'border border-borde bg-superficie hover:bg-resalte',
                 ].join(' ')}
               >
                 {h.titulo}

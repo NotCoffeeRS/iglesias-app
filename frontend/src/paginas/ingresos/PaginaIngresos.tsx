@@ -241,7 +241,7 @@ export default function PaginaIngresos() {
       'block rounded-full px-3.5 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors',
       activo
         ? 'bg-primario text-sobre-primario'
-        : 'border border-borde bg-superficie text-texto hover:bg-superficie-2',
+        : 'border border-borde bg-superficie text-texto hover:bg-resalte',
     ].join(' ')
 
   return (
