@@ -8,6 +8,10 @@ export function mensajeDeError(error: unknown, accion: string): string {
     if (error.estado === 0) return 'No se pudo conectar con el servidor. Revisa tu conexión.'
     if (error.estado === 403) return `No tienes permiso para ${accion}.`
     if (error.estado === 404) return 'Ese horario o sede ya no existe. Recarga la página.'
+    // 409: el servidor responde que el horario ya existe (misma sede, tipo, día y hora) o que
+    // sus datos relacionados cambiaron.
+    if (error.estado === 409)
+      return 'Ya existe un horario igual (misma sede, tipo, día y hora), o los datos cambiaron. Revisa lo escrito; si sigue igual, recarga la página.'
     if (error.estado === 422 || error.estado === 400) return error.message
   }
   return `No se pudo ${accion}. Inténtalo otra vez.`
