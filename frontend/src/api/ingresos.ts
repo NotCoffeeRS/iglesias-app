@@ -14,14 +14,15 @@
 import { api } from './cliente'
 
 export type TipoIngreso = 'diezmos' | 'ofrendas' | 'evami' | 'talento' | 'otras'
-export type Culto = 'culto_domingo' | 'culto_entre_semana' | 'otro'
+export type Culto = 'culto_domingo' | 'culto_entre_semana'
 
 export interface Ingreso {
   id: number
   iglesia_id: number
   iglesia_nombre?: string | null
   fecha: string
-  culto?: Culto | null
+  /** Lo que guardó el servidor; puede ser un valor que esta pantalla ya no ofrece. */
+  culto?: string | null
   tipo: TipoIngreso
   /** Texto con dos decimales ("1500.50"); se tolera también un número. */
   monto: string | number
@@ -85,5 +86,4 @@ export const TIPOS: { clave: TipoIngreso; nombre: string; ayuda?: string }[] = [
 export const CULTOS: { clave: Culto; nombre: string }[] = [
   { clave: 'culto_domingo', nombre: 'Culto de domingo' },
   { clave: 'culto_entre_semana', nombre: 'Culto entre semana' },
-  { clave: 'otro', nombre: 'Otro culto' },
 ]
