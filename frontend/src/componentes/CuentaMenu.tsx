@@ -19,7 +19,7 @@ export function BotonCerrarSesion({ alCerrar }: { alCerrar?: () => void }) {
       <button
         type="button"
         onClick={() => setConfirmando(true)}
-        className="w-full rounded-xl border border-borde px-3.5 py-2.5 text-left font-semibold text-texto-suave transition-colors hover:bg-superficie-2 hover:text-texto"
+        className="w-full rounded-xl border border-borde px-3.5 py-2.5 text-left font-semibold text-peligro transition-colors hover:bg-peligro-fondo"
       >
         Cerrar sesión
       </button>
