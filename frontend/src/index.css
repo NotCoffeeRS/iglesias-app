@@ -24,6 +24,17 @@
   --c-peligro: #b42318;
   --c-peligro-fondo: #fdecea;
   --c-velo: rgb(17 52 59 / 0.45);
+  /* Un color por tipo de grupo: barra y etiqueta (el nombre del tipo siempre va escrito). */
+  --c-tipo-red: #287c80;
+  --c-tipo-red-texto: #1b5b5f;
+  --c-tipo-celula: #4f9a5f;
+  --c-tipo-celula-texto: #2b6138;
+  --c-tipo-ministerio: #c9942f;
+  --c-tipo-ministerio-texto: #7a5410;
+  --c-tipo-escuela: #c0684a;
+  --c-tipo-escuela-texto: #8a3f27;
+  --c-tipo-area: #7a70b8;
+  --c-tipo-area-texto: #4d4488;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -44,6 +55,16 @@
     --c-peligro: #ffb4ab;
     --c-peligro-fondo: #4a1712;
     --c-velo: rgb(0 0 0 / 0.55);
+    --c-tipo-red: #5fb3b6;
+    --c-tipo-red-texto: #bfe3e4;
+    --c-tipo-celula: #7fc58f;
+    --c-tipo-celula-texto: #c3e8cb;
+    --c-tipo-ministerio: #e0b050;
+    --c-tipo-ministerio-texto: #f1d79a;
+    --c-tipo-escuela: #e08e72;
+    --c-tipo-escuela-texto: #f3c3b2;
+    --c-tipo-area: #a59bdc;
+    --c-tipo-area-texto: #d3cdf2;
   }
 }
 
@@ -63,6 +84,16 @@
   --color-peligro: var(--c-peligro);
   --color-peligro-fondo: var(--c-peligro-fondo);
   --color-velo: var(--c-velo);
+  --color-tipo-red: var(--c-tipo-red);
+  --color-tipo-red-texto: var(--c-tipo-red-texto);
+  --color-tipo-celula: var(--c-tipo-celula);
+  --color-tipo-celula-texto: var(--c-tipo-celula-texto);
+  --color-tipo-ministerio: var(--c-tipo-ministerio);
+  --color-tipo-ministerio-texto: var(--c-tipo-ministerio-texto);
+  --color-tipo-escuela: var(--c-tipo-escuela);
+  --color-tipo-escuela-texto: var(--c-tipo-escuela-texto);
+  --color-tipo-area: var(--c-tipo-area);
+  --color-tipo-area-texto: var(--c-tipo-area-texto);
 }
 
 /* Tipografías variables: títulos con Bricolage Grotesque, texto con Atkinson Hyperlegible Next. */

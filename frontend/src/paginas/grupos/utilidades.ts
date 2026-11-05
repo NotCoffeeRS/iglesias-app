@@ -52,6 +52,25 @@ export function useCarga<T>(pedir: () => Promise<T>, accion: string, dependencia
   return { estado, reintentar }
 }
 
+/** Colores de cada tipo de grupo: barra lateral de la tarjeta y etiqueta (clases escritas completas). */
+const ESTILO_TIPO: Record<TipoGrupo, { barra: string; etiqueta: string }> = {
+  red: { barra: 'border-l-tipo-red', etiqueta: 'bg-tipo-red/20 text-tipo-red-texto' },
+  celula: { barra: 'border-l-tipo-celula', etiqueta: 'bg-tipo-celula/20 text-tipo-celula-texto' },
+  ministerio: {
+    barra: 'border-l-tipo-ministerio',
+    etiqueta: 'bg-tipo-ministerio/20 text-tipo-ministerio-texto',
+  },
+  escuela: {
+    barra: 'border-l-tipo-escuela',
+    etiqueta: 'bg-tipo-escuela/20 text-tipo-escuela-texto',
+  },
+  area: { barra: 'border-l-tipo-area', etiqueta: 'bg-tipo-area/20 text-tipo-area-texto' },
+}
+
+export function estiloTipo(clave: TipoGrupo) {
+  return ESTILO_TIPO[clave]
+}
+
 export function nombreTipo(clave: TipoGrupo): string {
   return TIPOS_GRUPO.find((t) => t.clave === clave)?.nombre ?? clave
 }

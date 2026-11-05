@@ -2,7 +2,7 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { listarGrupos, TIPOS_GRUPO, type TipoGrupo } from '../../api/grupos'
 import { obtenerYo } from '../../api/usuarios'
 import { Cargando, ErrorConReintento } from './comunes'
-import { claseBotonPrincipal, nombreTipo, useCarga } from './utilidades'
+import { claseBotonPrincipal, estiloTipo, nombreTipo, useCarga } from './utilidades'
 
 // Quienes crean grupos (el servidor lo vuelve a validar).
 const CARGOS_QUE_CREAN = ['presbitero', 'pastor', 'apoyo_pastor']
@@ -111,13 +111,21 @@ export default function ListaGrupos() {
               <li key={g.id}>
                 <Link
                   to={`/grupos/${g.id}/editar`}
-                  className="block h-full rounded-3xl border border-borde bg-superficie p-4 transition-colors hover:bg-superficie-2"
+                  className={[
+                    'block h-full rounded-3xl border border-l-[6px] border-borde bg-superficie p-4 transition-colors hover:bg-superficie-2',
+                    estiloTipo(g.tipo).barra,
+                  ].join(' ')}
                 >
                   <span className="flex items-start justify-between gap-3">
                     <span className="font-titulo text-lg font-semibold text-primario">
                       {g.nombre}
                     </span>
-                    <span className="shrink-0 rounded-full bg-acento px-2.5 py-0.5 text-xs font-semibold text-acento-texto">
+                    <span
+                      className={[
+                        'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                        estiloTipo(g.tipo).etiqueta,
+                      ].join(' ')}
+                    >
                       {nombreTipo(g.tipo)}
                     </span>
                   </span>
