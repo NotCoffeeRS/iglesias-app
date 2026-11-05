@@ -2,11 +2,11 @@
 
 from typing import Annotated
 
-from app.modelos.grupos import Grupo
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.db import get_db
+from app.modelos.grupos import Grupo
 from app.modelos.usuarios import Usuario
 from app.seguridad.tokens import obtener_usuario_id
 
