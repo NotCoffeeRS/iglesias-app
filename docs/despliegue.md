@@ -48,7 +48,9 @@ Todo corre en **una sola computadora** (la de Jessica, que ya tiene PostgreSQL 1
    python -m scripts.cargar_datos_ejemplo --confirmar  # carga los datos
    ```
 
-4. Arranca la API: `python -m uvicorn app.main:app --reload`
+4. Arranca la API: `python -m uvicorn app.main:app`
+
+   **En Windows no uses `--reload` para la demo.** El recargado automático puede quedarse a medias al hacer `git pull` y entonces el CORS no funciona (el navegador bloquea las peticiones) hasta reiniciar. Cada vez que cambie el código, detén la API con `Ctrl+C` y vuelve a arrancarla a mano. (Lo detectó Jessica en su recorrido del 5 nov.)
 
 **Terminal 2: la web** (desde `frontend`): `npm run dev` y abrir `http://localhost:5173`. Para verla en el celular, con la misma red wifi, abre `http://IP-DE-LA-COMPUTADORA:5173`; en ese caso hay que arrancar la API (paso 4) con `$env:CORS_ORIGINS = "http://IP-DE-LA-COMPUTADORA:5173"`.
 
@@ -87,6 +89,7 @@ Si una pantalla dice "No se pudo conectar", salta a otra parte de la demo y di c
 | `alembic upgrade head` dice que no conecta | Revisa que PostgreSQL esté encendido, el nombre de la base y la contraseña de `DATABASE_URL` |
 | La API no arranca: falta `SECRET_KEY` | La variable debe tener 32 caracteres o más y estar en la misma terminal |
 | La web dice "No se pudo conectar" aunque la API responde | Falta CORS (#75) o la web apunta a otra dirección: revisa `VITE_API_URL` y reinicia `npm run dev` |
+| Tras un `git pull` la web dice "No se pudo conectar" o el navegador bloquea las peticiones (error de CORS en la consola) | Reinicia la API a mano: `Ctrl+C` y volver a arrancarla. En Windows el recargado automático (`--reload`) se queda a medias y el CORS no funciona hasta reiniciar |
 | El script dice que la base no es local | Solo corre contra `localhost`; revisa `DATABASE_URL` |
 
 ## Orden recomendado (despliegue en la nube, para después)
