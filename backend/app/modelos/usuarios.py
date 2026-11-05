@@ -78,6 +78,13 @@ class Usuario(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
+    # Ficha de miembro de esta persona (opcional: no todas las cuentas tienen ficha).
+    # Un miembro tiene a lo sumo UNA cuenta (índice único más abajo). El "área" del usuario
+    # no es una columna: sale de los grupos que dirige este miembro (`grupos.lider_miembro_id`).
+    miembro_id: Mapped[int | None] = mapped_column(
+        ForeignKey("miembros.id", ondelete="RESTRICT", name="fk_usuarios_miembro_id")
+    )
+
     __table_args__ = (
         # El cargo debe ser uno de la lista cerrada.
         CheckConstraint(f"cargo IN ({lista_sql(CARGOS)})", name="ck_usuarios_cargo"),
@@ -89,4 +96,7 @@ class Usuario(Base):
         # Nombre de usuario único SIN distinguir mayúsculas: se indexa lower(nombre_usuario).
         # Nota para el login (#7): hay que buscar comparando también en minúsculas.
         Index("uq_usuarios_nombre_usuario_minusculas", func.lower(nombre_usuario), unique=True),
+        # Un miembro no puede tener dos cuentas. Los valores vacíos no cuentan: PostgreSQL
+        # permite varias cuentas sin ficha de miembro (miembro_id vacío).
+        Index("uq_usuarios_miembro_id", "miembro_id", unique=True),
     )
