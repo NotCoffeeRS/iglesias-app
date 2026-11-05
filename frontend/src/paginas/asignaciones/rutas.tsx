@@ -10,6 +10,8 @@ export const menu: ModuloRutas['menu'] = [
     ruta: '/asignaciones',
     etiqueta: 'Asignaciones',
     orden: 35,
+    seccion: 'personas',
+    icono: 'asignaciones',
     descripcion: 'Integrantes de grupos y células',
     cargos: CARGOS_CON_MIEMBROS_Y_GRUPOS,
   },

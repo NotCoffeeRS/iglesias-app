@@ -14,6 +14,8 @@ export const menu: ModuloRutas['menu'] = [
     ruta: '/usuarios',
     etiqueta: 'Usuarios',
     orden: 30,
+    seccion: 'personas',
+    icono: 'usuarios',
     cargos: CARGOS_QUE_GESTIONAN_USUARIOS,
     descripcion: 'Cuentas y cargos del liderazgo',
   },
