@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import type { EntradaMenu } from './tipos'
+import { useMenuVisible } from './useMenuVisible'
 
 interface Props {
   menu: EntradaMenu[]
@@ -25,7 +26,8 @@ function Marca() {
 }
 
 /** Estructura común: encabezado, menú (cajón en celular, barra lateral en computadora) y contenido. */
-export default function Layout({ menu }: Props) {
+export default function Layout({ menu: menuCompleto }: Props) {
+  const menu = useMenuVisible(menuCompleto)
   const [abierto, setAbierto] = useState(false)
   const cerrar = () => setAbierto(false)
 
