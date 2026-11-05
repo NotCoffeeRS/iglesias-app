@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { EntradaMenu } from './tipos'
+import { useMenuVisible } from './useMenuVisible'
 
 function fechaDeHoy(): string {
   const texto = new Date().toLocaleDateString('es-MX', {
@@ -16,7 +17,8 @@ function fechaDeHoy(): string {
  * El primero ocupa el bloque grande.
  */
 export default function Inicio({ menu }: { menu: EntradaMenu[] }) {
-  const accesos = menu.filter((e) => e.descripcion)
+  const visibles = useMenuVisible(menu)
+  const accesos = visibles.filter((e) => e.descripcion)
 
   return (
     <section>
