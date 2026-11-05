@@ -1,4 +1,4 @@
-# Guía de demo — Iglesias App
+# Guía de demo — Tessia
 
 Guion para presentar la aplicación en unos **15 minutos**, mostrando lo que hace cada cargo. Está pensado para hacerse en un
 **celular** (o en una ventana angosta de la computadora), porque así se usará.
@@ -95,7 +95,7 @@ Marca cada punto antes de presentar. Si uno falla, mira la sección 5.
 
 ### Cierre
 
-Menú → **Cerrar sesión**. **Di** qué falta (sección 4) y qué sigue.
+Al pie del menú → **Cerrar sesión** (la app pide confirmar). **Di** qué falta (sección 4) y qué sigue.
 
 ## 3. Si hay poco tiempo
 
