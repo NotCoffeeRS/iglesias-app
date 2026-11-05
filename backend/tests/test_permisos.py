@@ -34,13 +34,16 @@ se escribe según el plan y se marca `xfail(strict=True)` con el código del pos
 la tabla del PR). Si algún día el servidor cambia y la prueba empieza a pasar, `strict` avisa.
 """
 
+import os
 import secrets
 import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+import jwt
 import pytest
 from alembic.config import Config
 from fastapi.testclient import TestClient
@@ -905,3 +908,135 @@ def test_el_apoyo_no_toca_cuentas_con_acceso_al_dinero(api: Api) -> None:
     cambio = cambios_de(api, "tesorero", activo=False)
     assert api.put(f"/usuarios/{identificador}", "apoyo_pastor", cambio).status_code == 403
     assert api.put(f"/usuarios/{identificador}", "pastor", cambio).status_code == 200
+
+
+# ===========================================================================
+# FASE 3: sin sesión, token malo, credenciales incorrectas y cuenta desactivada
+# ===========================================================================
+
+# Rutas protegidas de cada módulo (todo lo que no sea horarios y ubicaciones exige sesión).
+RUTAS_PROTEGIDAS = [
+    "/usuarios",
+    "/usuarios/yo",
+    "/miembros",
+    "/grupos",
+    f"/ingresos?{FILTRO}",
+    f"/gastos?{FILTRO}",
+    "/asistencia",
+    "/menores",
+    "/asignaciones/grupos",
+    "/eventos",
+    "/comunicados",
+    "/iglesias",
+    "/sedes",
+]
+MENSAJE_SESION_INVALIDA = "Sesión no válida o vencida"
+
+
+@pytest.mark.parametrize("ruta", RUTAS_PROTEGIDAS)
+def test_sin_sesion_toda_ruta_protegida_da_401(api: Api, ruta: str) -> None:
+    """EXTRA-01: sin Authorization, ningún módulo protegido responde datos."""
+    respuesta = api.get(ruta)
+    assert respuesta.status_code == 401
+    assert respuesta.json() == {"detail": MENSAJE_SESION_INVALIDA}
+    assert respuesta.headers["WWW-Authenticate"] == "Bearer"
+
+
+def test_sin_sesion_se_ven_horarios_y_ubicaciones_y_nada_mas(api: Api) -> None:
+    """EXTRA-02 (D10): lo público es solo la ficha de cada iglesia con sus sedes y horarios."""
+    respuesta = api.get("/publico/iglesias")
+    assert respuesta.status_code == 200
+    iglesias = respuesta.json()
+    assert len(iglesias) == 4
+    campos = {"id", "nombre", "pastor", "foto_url", "telefono_iglesia", "redes", "sedes"}
+    assert all(set(fila) == campos for fila in iglesias)
+    # Nada de dinero ni de personas en lo público.
+    assert "monto" not in respuesta.text and "miembro" not in respuesta.text
+    assert api.get("/salud").status_code == 200
+
+
+def _token_malo(modo: str, usuario_id: int) -> str:
+    """Un token que NO debe aceptarse, armado con la misma SECRET_KEY de la prueba."""
+    clave = os.environ["SECRET_KEY"]
+    ahora = datetime.now(UTC)
+    contenido = {"sub": str(usuario_id), "iat": ahora, "exp": ahora + timedelta(minutes=30)}
+    firma, algoritmo = clave, "HS256"
+    if modo == "vencido":
+        contenido["iat"], contenido["exp"] = (
+            ahora - timedelta(hours=1),
+            ahora - timedelta(minutes=30),
+        )
+    elif modo == "otra_clave":
+        firma = secrets.token_urlsafe(32)
+    elif modo == "sin_exp":
+        contenido.pop("exp")
+    elif modo == "algoritmo":
+        firma, algoritmo = secrets.token_urlsafe(48), "HS384"
+    elif modo == "usuario_inexistente":
+        contenido["sub"] = "99999999"
+    elif modo == "sujeto_no_numerico":
+        contenido["sub"] = "no-es-un-numero"
+    token = jwt.encode(contenido, firma, algorithm=algoritmo)
+    if modo == "alterado":
+        cabecera, datos, firma_token = token.split(".")
+        token = f"{cabecera}.{datos}.{'A' if firma_token[0] != 'A' else 'B'}{firma_token[1:]}"
+    return token
+
+
+@pytest.mark.parametrize(
+    "modo",
+    [
+        "vencido",
+        "alterado",
+        "otra_clave",
+        "sin_exp",
+        "algoritmo",
+        "usuario_inexistente",
+        "sujeto_no_numerico",
+    ],
+)
+def test_un_token_vencido_o_alterado_da_401(api: Api, modo: str) -> None:
+    """EXTRA-03: ni el token vencido, ni el alterado, ni el de otra clave abren nada."""
+    token = _token_malo(modo, api.mundo.ids["presbitero"])
+    for ruta in ("/usuarios/yo", f"/ingresos?{FILTRO}"):
+        respuesta = api.cliente.get(ruta, headers={"Authorization": f"Bearer {token}"})
+        assert respuesta.status_code == 401
+        assert token not in respuesta.text
+
+
+def test_credenciales_incorrectas_dan_el_mismo_401_sin_revelar_cual_fallo(api: Api) -> None:
+    """EXTRA-04: con la contraseña buena entra; con una mala o un usuario falso, mismo mensaje."""
+    usuario = api.mundo.usuarios["pastor"]
+    clave = api.mundo.claves["pastor"]
+    entra = api.cliente.post("/auth/login", json={"usuario": usuario, "contrasena": clave})
+    assert entra.status_code == 200 and entra.json()["token_type"] == "bearer"
+    # El token que entrega el login abre la sesión de esa cuenta.
+    cabecera = {"Authorization": f"Bearer {entra.json()['access_token']}"}
+    assert api.cliente.get("/usuarios/yo", headers=cabecera).json()["cargo"] == "pastor"
+
+    mala = api.cliente.post(
+        "/auth/login", json={"usuario": usuario, "contrasena": "otra-clave-xyz"}
+    )
+    falso = api.cliente.post("/auth/login", json={"usuario": "no.existe", "contrasena": clave})
+    assert mala.status_code == falso.status_code == 401
+    assert mala.json() == falso.json()  # no dice si falló el usuario o la contraseña
+    assert clave not in mala.text + falso.text
+
+
+def test_una_cuenta_desactivada_no_inicia_sesion_ni_con_la_contraseña_correcta(api: Api) -> None:
+    """EXTRA-05: el login la rechaza con el mismo 401 de cualquier error de credenciales."""
+    respuesta = api.cliente.post(
+        "/auth/login",
+        json={
+            "usuario": api.mundo.usuarios["desactivado"],
+            "contrasena": api.mundo.claves["desactivado"],
+        },
+    )
+    assert respuesta.status_code == 401
+    assert respuesta.json()["detail"] == "Usuario o contraseña incorrectos."
+
+
+def test_una_cuenta_desactivada_con_token_valido_no_entra(api: Api) -> None:
+    """EXTRA-06: aunque conserve un token firmado, el servidor consulta la cuenta y da 401."""
+    for ruta in ("/usuarios/yo", f"/ingresos?{FILTRO}"):
+        assert api.get(ruta, "desactivado").status_code == 401
