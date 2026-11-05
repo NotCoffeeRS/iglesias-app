@@ -38,14 +38,16 @@ import os
 import sys
 from collections import defaultdict
 from collections.abc import Callable, Mapping, Sequence
+from datetime import date
 
-from sqlalchemy import inspect, select
+from sqlalchemy import func, inspect, select
 from sqlalchemy.engine import URL, create_engine, make_url
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
-from app.modelos import Iglesia, Sede
+from app.modelos import Grupo, GrupoMiembro, Iglesia, Miembro, Sede, Usuario
 from app.modelos.utilidades import obtener_url_base_datos
+from app.seguridad.contrasenas import crear_hash
 
 # ---------------------------------------------------------------------------
 # Constantes
@@ -98,6 +100,228 @@ IGLESIAS = (
 
 # Nombre de la iglesia "principal" de la demo: ahí viven las 5 cuentas con iglesia.
 IGLESIA_DEMO = "3ra IAFCJ de Mérida"
+
+# Miembros ficticios. Cada uno: (nombre, estado, estado civil, nacimiento, bautizo, ingreso).
+# Todo es inventado; los nombres son únicos dentro de cada iglesia (así se reconocen al repetir).
+# Los teléfonos y correos se generan abajo con formatos que no existen (555-... y example.com).
+MIEMBROS = {
+    "3ra IAFCJ de Mérida": (
+        (
+            "Marta Elena Canul Pech",
+            "activo",
+            "casado",
+            date(1984, 3, 12),
+            date(2006, 5, 7),
+            date(2005, 1, 9),
+        ),
+        (
+            "Rosa Isela Chan May",
+            "activo",
+            "casado",
+            date(1990, 7, 25),
+            date(2010, 8, 15),
+            date(2009, 2, 1),
+        ),
+        (
+            "Carlos Alberto Dzul Uc",
+            "activo",
+            "casado",
+            date(1979, 11, 2),
+            date(2001, 4, 22),
+            date(2000, 6, 4),
+        ),
+        (
+            "Lucía Fernanda Poot Kú",
+            "activo",
+            "soltero",
+            date(1998, 1, 30),
+            date(2015, 9, 6),
+            date(2014, 3, 2),
+        ),
+        (
+            "Daniel Esteban Cime Tun",
+            "activo",
+            "soltero",
+            date(2001, 6, 18),
+            date(2018, 12, 2),
+            date(2017, 5, 7),
+        ),
+        (
+            "Sofía Guadalupe Euán Cauich",
+            "activo",
+            "soltero",
+            date(2003, 9, 9),
+            date(2019, 7, 14),
+            date(2018, 8, 5),
+        ),
+        (
+            "Miguel Ángel Balam Chi",
+            "activo",
+            "casado",
+            date(1975, 4, 5),
+            date(1999, 10, 3),
+            date(1998, 2, 8),
+        ),
+        (
+            "Elena Beatriz Cocom Ek",
+            "activo",
+            "viudo",
+            date(1968, 12, 21),
+            date(1995, 6, 11),
+            date(1994, 1, 2),
+        ),
+        (
+            "Josué Emanuel Pat Yam",
+            "activo",
+            "soltero",
+            date(2000, 2, 14),
+            date(2016, 11, 13),
+            date(2015, 4, 19),
+        ),
+        (
+            "Abigail Noemí Tzec Moo",
+            "activo",
+            "soltero",
+            date(1999, 8, 3),
+            date(2017, 3, 5),
+            date(2016, 9, 4),
+        ),
+        ("Ricardo Iván Ay Sosa", "visitante", None, date(1992, 5, 27), None, None),
+        (
+            "Paola Andrea Kantún Ceh",
+            "en_proceso_ganar",
+            "union_libre",
+            date(1995, 10, 8),
+            None,
+            date(2026, 8, 2),
+        ),
+        (
+            "Hugo Armando Mex Dzib",
+            "en_proceso_discipular",
+            "casado",
+            date(1987, 1, 16),
+            None,
+            date(2026, 3, 1),
+        ),
+        (
+            "Teresa de Jesús Be Couoh",
+            "inactivo",
+            "divorciado",
+            date(1971, 9, 29),
+            date(2003, 7, 20),
+            date(2002, 5, 5),
+        ),
+        (
+            "Samuel David Chulim Pool",
+            "en_proceso_consolidar",
+            "casado",
+            date(1983, 12, 4),
+            None,
+            date(2026, 5, 3),
+        ),
+    ),
+    "4ta IAFCJ de Mérida": (
+        (
+            "Andrés Felipe Kauil Mis",
+            "activo",
+            "casado",
+            date(1981, 6, 10),
+            date(2004, 3, 14),
+            date(2003, 8, 3),
+        ),
+        (
+            "Karla Yamileth Tamay Ake",
+            "activo",
+            "soltero",
+            date(1996, 4, 23),
+            date(2014, 10, 5),
+            date(2013, 2, 3),
+        ),
+        ("Pedro Antonio Xool Pech", "visitante", None, date(1989, 8, 19), None, None),
+    ),
+    "6ta IAFCJ de Mérida": (
+        (
+            "Verónica Alejandra Ucán Dzul",
+            "activo",
+            "casado",
+            date(1986, 2, 8),
+            date(2008, 6, 1),
+            date(2007, 4, 1),
+        ),
+        (
+            "Fernando Ismael Cab Canché",
+            "en_proceso_ganar",
+            "soltero",
+            date(1997, 11, 11),
+            None,
+            date(2026, 9, 6),
+        ),
+    ),
+    "IAFCJ de Huhí": (
+        (
+            "Rubí Esmeralda Mukul Pat",
+            "activo",
+            "soltero",
+            date(1994, 3, 3),
+            date(2012, 5, 20),
+            date(2011, 1, 16),
+        ),
+        (
+            "Gael Eduardo Sulub May",
+            "activo",
+            "casado",
+            date(1980, 7, 7),
+            date(2002, 9, 8),
+            date(2001, 3, 4),
+        ),
+    ),
+}
+
+# Correos de ejemplo solo para algunos miembros (example.com es un dominio reservado).
+CORREOS = {
+    "Marta Elena Canul Pech": "marta.canul@example.com",
+    "Carlos Alberto Dzul Uc": "carlos.dzul@example.com",
+}
+
+# Las 6 cuentas de ejemplo: (cargo, nombre de usuario, nombre completo, ¿pertenece a una iglesia?).
+# El presbítero es el único cargo que puede no tener iglesia. Los nombres no son de personas
+# reales. La del líder de célula usa el nombre de su ficha de miembro (ver CUENTA_LIGADA).
+CUENTAS = (
+    ("presbitero", "presbitero.ejemplo", "Presbítero de ejemplo", False),
+    ("pastor", "pastor.ejemplo", "Pastor de ejemplo", True),
+    ("apoyo_pastor", "apoyo.ejemplo", "Apoyo del pastor de ejemplo", True),
+    ("tesorero", "tesorero.ejemplo", "Tesorero de ejemplo", True),
+    ("lider_celula", "lider.celula.ejemplo", "Marta Elena Canul Pech", True),
+    ("ujier", "ujier.ejemplo", "Ujier de ejemplo", True),
+)
+
+# Decisión D21: el "área" de un usuario sale de los grupos que dirige su ficha de miembro.
+# Por eso la cuenta del líder de célula se liga (miembro_id) a la ficha de este miembro.
+CUENTA_LIGADA = {"lider_celula": "Marta Elena Canul Pech"}
+
+# Grupos de la iglesia de la demo: (tipo, nombre, líder, asistente). El líder es siempre
+# un miembro (no un usuario) y no puede ser la misma persona que el asistente.
+GRUPOS = (
+    ("celula", "Célula Betania", "Marta Elena Canul Pech", "Rosa Isela Chan May"),
+    ("red", "Red de Damas", "Elena Beatriz Cocom Ek", "Sofía Guadalupe Euán Cauich"),
+    ("red", "Red de Varones", "Miguel Ángel Balam Chi", "Daniel Esteban Cime Tun"),
+    ("red", "Red de Jóvenes", "Josué Emanuel Pat Yam", "Abigail Noemí Tzec Moo"),
+    ("ministerio", "Ministerio de Alabanza", "Abigail Noemí Tzec Moo", "Josué Emanuel Pat Yam"),
+    ("area", "Tiendita", "Samuel David Chulim Pool", None),
+)
+
+# Quién está en cada grupo (además de su líder y asistente, que se agregan solos).
+# Un miembro solo puede estar en UNA célula; los demás miembros quedan "sin célula" y son
+# los que ve el ujier. En la célula también entra su líder, para que no salga en esa lista.
+INTEGRANTES = {
+    "Célula Betania": (
+        "Carlos Alberto Dzul Uc",
+        "Lucía Fernanda Poot Kú",
+        "Daniel Esteban Cime Tun",
+        "Sofía Guadalupe Euán Cauich",
+    ),
+    "Ministerio de Alabanza": ("Sofía Guadalupe Euán Cauich",),
+}
 
 
 class ErrorDatosEjemplo(Exception):
@@ -214,7 +438,7 @@ def _cargar_iglesias_y_sedes(
             resumen,
             "iglesias",
             sesion.scalar(select(Iglesia).where(Iglesia.nombre == datos["nombre"])),
-            lambda datos=datos: Iglesia(nombre=datos["nombre"], pastor=datos["pastor"]),
+            lambda: Iglesia(nombre=datos["nombre"], pastor=datos["pastor"]),
         )
         iglesias[datos["nombre"]] = iglesia
         for nombre_sede in datos["sedes"]:
@@ -224,25 +448,151 @@ def _cargar_iglesias_y_sedes(
                 resumen,
                 "sedes",
                 sesion.scalar(
-                    select(Sede).where(
-                        Sede.iglesia_id == iglesia.id, Sede.nombre == nombre_sede
-                    )
+                    select(Sede).where(Sede.iglesia_id == iglesia.id, Sede.nombre == nombre_sede)
                 ),
-                lambda iglesia=iglesia, nombre_sede=nombre_sede: Sede(
-                    iglesia_id=iglesia.id, nombre=nombre_sede, direccion=POR_CONFIRMAR
-                ),
+                lambda: Sede(iglesia_id=iglesia.id, nombre=nombre_sede, direccion=POR_CONFIRMAR),
             )
     return iglesias
+
+
+def _cargar_miembros(
+    sesion: Session, resumen: dict[str, dict[str, int]], iglesias: Mapping[str, Iglesia]
+) -> dict[str, Miembro]:
+    """Crea los miembros ficticios. Devuelve los miembros por nombre.
+
+    Los miembros no tienen clave natural en la base, así que se reconocen por la pareja
+    (iglesia, nombre): los nombres inventados no se repiten dentro de una iglesia.
+    """
+    miembros: dict[str, Miembro] = {}
+    numero = 0  # contador para inventar teléfonos distintos (555-0101, 555-0102...)
+    for nombre_iglesia, lista in MIEMBROS.items():
+        iglesia = iglesias[nombre_iglesia]
+        for nombre, estado, estado_civil, nacimiento, bautizo, ingreso in lista:
+            numero += 1
+            miembros[nombre] = _obtener_o_crear(
+                sesion,
+                resumen,
+                "miembros",
+                sesion.scalar(
+                    select(Miembro).where(
+                        Miembro.iglesia_id == iglesia.id, Miembro.nombre == nombre
+                    )
+                ),
+                lambda: Miembro(
+                    iglesia_id=iglesia.id,
+                    nombre=nombre,
+                    estado=estado,
+                    estado_civil=estado_civil,
+                    fecha_nacimiento=nacimiento,
+                    fecha_bautizo=bautizo,
+                    fecha_ingreso=ingreso,
+                    # Teléfono con formato que no existe en la vida real.
+                    telefono=f"555-{100 + numero:04d}",
+                    correo=CORREOS.get(nombre),
+                    direccion=POR_CONFIRMAR,
+                ),
+            )
+    return miembros
+
+
+def _cargar_cuentas(
+    sesion: Session,
+    resumen: dict[str, dict[str, int]],
+    iglesias: Mapping[str, Iglesia],
+    miembros: Mapping[str, Miembro],
+    claves: Mapping[str, str],
+) -> dict[str, Usuario]:
+    """Crea las 6 cuentas de ejemplo (una por cargo). Devuelve las cuentas por cargo."""
+    cuentas: dict[str, Usuario] = {}
+    for cargo, nombre_usuario, nombre_completo, tiene_iglesia in CUENTAS:
+        ficha = miembros.get(CUENTA_LIGADA.get(cargo, ""))
+        cuentas[cargo] = _obtener_o_crear(
+            sesion,
+            resumen,
+            "usuarios",
+            # El nombre de usuario es único sin importar mayúsculas (índice sobre lower()).
+            sesion.scalar(
+                select(Usuario).where(func.lower(Usuario.nombre_usuario) == nombre_usuario.lower())
+            ),
+            # El hash (costoso a propósito) solo se calcula si la cuenta aún no existe.
+            # Una cuenta que ya existe conserva su contraseña: no se le cambia.
+            lambda: Usuario(
+                nombre_usuario=nombre_usuario,
+                contrasena_hash=crear_hash(claves[cargo]),
+                nombre_completo=nombre_completo,
+                cargo=cargo,
+                iglesia_id=iglesias[IGLESIA_DEMO].id if tiene_iglesia else None,
+                miembro_id=ficha.id if ficha is not None else None,
+            ),
+        )
+    return cuentas
+
+
+def _cargar_grupos(
+    sesion: Session,
+    resumen: dict[str, dict[str, int]],
+    iglesias: Mapping[str, Iglesia],
+    miembros: Mapping[str, Miembro],
+) -> None:
+    """Crea los grupos de la iglesia de la demo y a sus integrantes."""
+    iglesia = iglesias[IGLESIA_DEMO]
+    for tipo, nombre, lider, asistente in GRUPOS:
+        # (iglesia, tipo, nombre) es único en `grupos`.
+        grupo = _obtener_o_crear(
+            sesion,
+            resumen,
+            "grupos",
+            sesion.scalar(
+                select(Grupo).where(
+                    Grupo.iglesia_id == iglesia.id, Grupo.tipo == tipo, Grupo.nombre == nombre
+                )
+            ),
+            lambda: Grupo(
+                iglesia_id=iglesia.id,
+                tipo=tipo,
+                nombre=nombre,
+                lider_miembro_id=miembros[lider].id,
+                asistente_miembro_id=miembros[asistente].id if asistente else None,
+            ),
+        )
+        # Integrantes: líder y asistente (si hay) más los que lista INTEGRANTES, solo en los
+        # grupos que tienen lista (célula y ministerio); las redes y el área no la llevan.
+        if nombre not in INTEGRANTES:
+            continue
+        for persona in dict.fromkeys([lider, asistente, *INTEGRANTES[nombre]]):
+            if persona is None:
+                continue
+            _obtener_o_crear(
+                sesion,
+                resumen,
+                "grupo_miembros",
+                sesion.scalar(
+                    select(GrupoMiembro).where(
+                        GrupoMiembro.grupo_id == grupo.id,
+                        GrupoMiembro.miembro_id == miembros[persona].id,
+                    )
+                ),
+                # tipo_grupo es una copia del tipo del grupo; la base verifica que coincida.
+                lambda: GrupoMiembro(
+                    grupo_id=grupo.id, miembro_id=miembros[persona].id, tipo_grupo=grupo.tipo
+                ),
+            )
 
 
 def cargar_datos(sesion: Session, claves: Mapping[str, str]) -> dict[str, dict[str, int]]:
     """Carga todos los datos de ejemplo con la sesión dada y devuelve el resumen.
 
     No confirma la transacción: eso lo decide quien llama (así las pruebas y el modo
-    normal usan exactamente el mismo código).
+    normal usan exactamente el mismo código). El ORDEN importa por las llaves foráneas:
+    primero lo que otras tablas necesitan (iglesias), al final lo que depende de todo.
     """
     resumen = _nuevo_resumen()
-    _cargar_iglesias_y_sedes(sesion, resumen)
+    iglesias = _cargar_iglesias_y_sedes(sesion, resumen)
+    miembros = _cargar_miembros(sesion, resumen, iglesias)
+    # Las cuentas van después de los miembros: la del líder de célula apunta a su ficha.
+    _cargar_cuentas(sesion, resumen, iglesias, miembros, claves)
+    # Los grupos van al final: su líder y su asistente son miembros.
+    _cargar_grupos(sesion, resumen, iglesias, miembros)
     return resumen
 
 
