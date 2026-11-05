@@ -35,8 +35,8 @@ export default function Inicio({ menu }: { menu: EntradaMenu[] }) {
           {SECCIONES_MENU.map(({ clave, titulo }) => {
             const delGrupo = accesos.filter((e) => e.seccion === clave)
             if (delGrupo.length === 0) return null
-            // Mosaico (bento): la primera pantalla de cada sección es el bloque grande; en la
-            // primera sección va oscuro y en las demás, verde-agua. Con menos de 3 accesos, todos iguales.
+            // Mosaico (bento): solo la primera sección lleva un bloque grande (oscuro); en las
+            // demás, y con menos de 3 accesos, todos los bloques son iguales.
             const hayBloqueGrande = delGrupo.length >= 3
             const esPrimeraSeccion =
               SECCIONES_MENU.find((s) => accesos.some((e) => e.seccion === s.clave))?.clave ===
@@ -48,18 +48,16 @@ export default function Inicio({ menu }: { menu: EntradaMenu[] }) {
                 </h2>
                 <ul className="mt-3 grid auto-rows-[minmax(8.5rem,auto)] grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
                   {delGrupo.map((acceso, i) => {
-                    const grande = hayBloqueGrande && i === 0
+                    const grande = hayBloqueGrande && esPrimeraSeccion && i === 0
                     return (
                       <li key={acceso.ruta} className={grande ? 'col-span-2 md:row-span-2' : ''}>
                         <Link
                           to={acceso.ruta}
                           className={[
                             'flex h-full flex-col justify-end rounded-3xl p-5 transition-colors',
-                            grande && esPrimeraSeccion
+                            grande
                               ? 'bg-primario text-sobre-primario hover:bg-primario-hover'
-                              : grande
-                                ? 'bg-acento text-acento-texto hover:bg-acento/75'
-                                : 'border border-borde bg-superficie hover:bg-resalte',
+                              : 'border border-borde bg-superficie hover:bg-resalte',
                           ].join(' ')}
                         >
                           <span
