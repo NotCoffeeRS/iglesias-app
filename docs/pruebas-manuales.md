@@ -68,7 +68,7 @@ Los datos "esperados" del mes salen de los datos de ejemplo: el 1 de nov hay ing
 | Niños y adolescentes (`/menores`) | Lista vacía (los datos de ejemplo no traen menores) y el botón "Registrar menor" | **Lista vacía con "Registrar menor"** |
 | Asignaciones | Los 6 grupos de la 3ra | **POR CONFIRMAR** (ver la nota de abajo) |
 | Miembros, Grupos, Usuarios, Iglesias, Eventos, Comunicados | Visibles en el menú | Sin probar |
-| Reporte financiero | La API no existe todavía (#29) | Sin probar (pendiente) |
+| Reporte financiero | En la 1ª tanda (`b3bf76c`) la API no existía todavía (#29); ya existe | Sin probar en la 1ª tanda. 2ª tanda: ver la sección 3.8 |
 
 > **Nota (POR CONFIRMAR).** Se vio una cuenta con **menú completo** y **Asignaciones con los 6 grupos de la 3ra**. Pudo ser el presbítero o el pastor; no se distinguió cuál era. Por eso esas dos filas del presbítero y las del pastor quedan por confirmar.
 
@@ -100,7 +100,7 @@ Los datos "esperados" del mes salen de los datos de ejemplo: el 1 de nov hay ing
 | `/miembros/nuevo` | El formulario abre (la web solo oculta el menú, no bloquea la dirección); el 403 llega al guardar | **El formulario abre** (no se guardó nada; el 403 al guardar: sin probar) |
 | `/menores` | "Sin acceso" | **"Sin acceso"** |
 | Asignaciones | No aparece en el menú | **Sin Asignaciones en el menú** |
-| Reporte financiero | La API no existe todavía (#29) | Sin probar (pendiente) |
+| Reporte financiero | En la 1ª tanda (`b3bf76c`) la API no existía todavía (#29); ya existe | Sin probar en la 1ª tanda. 2ª tanda: ver la sección 3.8 |
 
 ### 3.6 Líder de célula (`lider.celula.ejemplo`)
 
@@ -119,6 +119,23 @@ Los datos "esperados" del mes salen de los datos de ejemplo: el 1 de nov hay ing
 |---|---|---|
 | Menú | Inicio, Asistencia, Iglesias, Horarios, Eventos, Comunicados. Sin Asignaciones | **Coincide:** Inicio, Asistencia, Iglesias, Horarios, Eventos, Comunicados. **Sin Asignaciones** |
 | Asistencia | La lista de los miembros sin célula de su iglesia, para marcar quién faltó | Sin probar |
+
+### 3.8 Segunda tanda: menú agrupado, "Mi cuenta" y reportes (código `c8793b9`)
+
+Jessica volvió a entrar con las 6 cuentas después de actualizar el código (ver la sección 1). Aquí van **solo sus observaciones**, con las palabras que usó. Lo que no dijo queda como **POR CONFIRMAR** o **sin probar**; no se completó nada por deducción.
+
+Lo "esperado" sale de leer el código: el menú se agrupa en Iglesia, Personas y Dinero; el reporte financiero lo ven presbítero, pastor y tesorero (el servidor le responde 403 a los demás), y el presbítero, si no elige una iglesia, recibe además un consolidado; el reporte de asistencia lo ven todos los cargos menos el tesorero, con alcance por cargo (el presbítero, todas las iglesias; pastor y apoyo, su iglesia; el ujier, los miembros sin célula de su iglesia; el líder de célula, los integrantes de los grupos que dirige).
+
+| Cuenta | Esperado según el código | Resultado en el navegador |
+|---|---|---|
+| Presbítero | Reporte financiero con las 4 iglesias y consolidado. Menú agrupado. "Mi cuenta" en el menú | **Reporte financiero con las 4 iglesias; menú agrupado; "Mi cuenta" (perfil) visible.** Si apareció el consolidado y los totales: **POR CONFIRMAR**. Reporte de asistencia: **sin probar** |
+| Pastor | Reporte financiero y de asistencia, solo de su iglesia (la 3ra). Sin consolidado | **Ve el reporte financiero y el de asistencia; el menú y "Mi cuenta" se ven bien.** Qué iglesias salieron y los totales: **POR CONFIRMAR** |
+| Tesorero | Reporte financiero solo de su iglesia. Sin reporte de asistencia | **Se ve el reporte financiero; el menú y "Mi cuenta" se ven bien.** Qué iglesias salieron y los totales: **POR CONFIRMAR**. Si le aparece el reporte de asistencia: **sin probar** |
+| Apoyo del pastor | Sin reporte financiero. Con reporte de asistencia de su iglesia | **No tiene reporte financiero; lo demás normal.** Si le aparece el reporte de asistencia: **POR CONFIRMAR** |
+| Líder de célula | Sin reporte financiero. Reporte de asistencia solo con los integrantes de los grupos que dirige | **"Cuenta con lo acordado, se ve bien".** Qué módulos y reportes ve exactamente: **POR CONFIRMAR** |
+| Ujier | Sin reporte financiero. Reporte de asistencia con los miembros sin célula de su iglesia | **Aparece el reporte de asistencia.** Qué datos muestra: **POR CONFIRMAR** |
+
+Siguen **sin probar** en la 2ª tanda: el cierre de sesión desde "Mi cuenta", y si el consolidado del reporte financiero apareció solo para el presbítero.
 
 ## 4. Horarios y ubicaciones
 
