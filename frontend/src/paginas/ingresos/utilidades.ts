@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ErrorApi } from '../../api/cliente'
-import { CULTOS, TIPOS, type Culto, type TipoIngreso } from '../../api/ingresos'
+import { CULTOS, TIPOS, type TipoIngreso } from '../../api/ingresos'
 
 export function mensajeDeError(error: unknown, accion: string): string {
   if (error instanceof ErrorApi) {
@@ -130,8 +130,9 @@ export function nombreTipo(clave: TipoIngreso): string {
   return TIPOS.find((t) => t.clave === clave)?.nombre ?? clave
 }
 
-export function nombreCulto(clave?: Culto | null): string | null {
-  return clave ? (CULTOS.find((c) => c.clave === clave)?.nombre ?? clave) : null
+export function nombreCulto(clave?: string | null): string | null {
+  // Un ingreso ya guardado puede traer un valor que el selector ya no ofrece: se muestra igual.
+  return clave ? (CULTOS.find((c) => c.clave === clave)?.nombre ?? 'Otro culto') : null
 }
 
 export const claseBotonPrincipal =
