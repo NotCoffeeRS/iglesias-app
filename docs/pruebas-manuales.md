@@ -175,14 +175,14 @@ Cargados con `backend/scripts/cargar_datos_ejemplo.py` (Issue #5). El script no 
 - Sin sesión, `/ingresos`, `/gastos`, `/menores` y `/asignaciones/grupos` responden **401**.
 - Sin sesión, `/publico/iglesias` (horarios y ubicaciones) responde 200.
 
-Los casos de sesión (sin sesión, token vencido o alterado, credenciales incorrectas y cuenta desactivada) están cubiertos por pruebas automáticas en el **PR #99** (`backend/tests/test_permisos.py`), pendiente de fusión al escribir esto.
+Los casos de sesión (sin sesión, token vencido o alterado, credenciales incorrectas y cuenta desactivada) están cubiertos por pruebas automáticas en el **PR #99** (`backend/tests/test_permisos.py`), fusionado en `main` (commit `488f5fc`).
 
 ## 7. Pendientes
 
 | Pendiente | Detalle |
 |---|---|
-| **Reporte financiero** (#29) | No existe la API; el paso "reporte" del recorrido no se pudo probar. Lo tomó Ángeles |
-| **Reporte de asistencia** (#31) | No existe todavía. Lo tomó Ángeles |
+| **Reporte financiero** (#29) | Ya existe en `main`. En la 2ª tanda se **vio** con presbítero, pastor y tesorero (no con el apoyo). Falta anotar qué iglesias y qué totales salieron en cada cuenta, y si el consolidado apareció solo para el presbítero (sección 3.8) |
+| **Reporte de asistencia** (#31) | Ya existe en `main`. En la 2ª tanda se **vio** con el pastor y el ujier. Falta anotar qué datos muestra cada cuenta, en especial el líder de célula y el ujier, y si aparece con el presbítero, el apoyo y el líder (sección 3.8) |
 | **`backend/tests/test_recorrido.py`** | La prueba automática del recorrido (la otra mitad del Issue #35) **no se hizo todavía** |
 | Registrar y anular ingresos y gastos en el navegador | Sin probar |
 | Registrar miembros, menores, eventos y comunicados | Sin probar (solo se abrió el formulario en algunas cuentas) |
