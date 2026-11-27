@@ -38,7 +38,7 @@ Todo corre en **una sola computadora** (la de Jessica, que ya tiene PostgreSQL 1
 3. **Solo la primera vez (o con una base nueva): carga los datos de ejemplo.** Elige **seis contraseñas de al menos 12 caracteres** (una por cuenta); el script solo guarda su hash y nunca las imprime:
 
    ```powershell
-   $env:EJEMPLO_CLAVE_PRESBITERIO = "..."
+   $env:EJEMPLO_CLAVE_PRESBITERO = "..."
    $env:EJEMPLO_CLAVE_PASTOR = "..."
    $env:EJEMPLO_CLAVE_APOYO = "..."
    $env:EJEMPLO_CLAVE_TESORERO = "..."
